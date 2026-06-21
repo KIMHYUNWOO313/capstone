@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}AgriPredict - 예측 상품{% endblock %}
+{% block theme_toggle %}{% endblock %}
+{% block extra_css %}
+<style>
+body {
+    margin: 0;
+    background: #050805;
+}
+
+.products-page {
+    min-height: 100vh;
+    color: #fff;
+    background-image:
+        linear-gradient(90deg, rgba(5, 9, 5, 0.94) 0%, rgba(5, 9, 5, 0.82) 38%, rgba(5, 9, 5, 0.48) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.78)),
+        url("{% static 'images/background.png' %}");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.products-nav {
+    height: 66px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 36px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(5, 8, 5, 0.58);
+    backdrop-filter: blur(14px);
+}
+
+.products-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.products-logo {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9be35b;
+    background: rgba(120, 170, 48, 0.18);
+    border: 1px solid rgba(159, 224, 91, 0.30);
+    border-radius: 10px;
+}
+
+.products-links {
+    display: flex;
+    align-items: center;
+    gap: 54px;
+}
+
+.products-links a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.products-links a.active,
+.products-links a:hover {
+    color: #9be35b;
+}
+
+.products-links a.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -22px;
+    width: 76px;
+    height: 2px;
+    transform: translateX(-50%);
+    background: #9be35b;
+    box-shadow: 0 0 16px rgba(155, 227, 91, 0.8);
+}
+
+.products-wrap {
+    width: min(1180px, calc(100vw - 88px));
+    margin: 0 auto;
+    padding: 74px 0 70px;
+}
+
+.products-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 28px;
+    align-items: flex-end;
+    margin-bottom: 28px;
+}
+
+.products-eyebrow {
+    margin: 0 0 14px;
+    color: #9be35b;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.products-hero h1 {
+    margin: 0;
+    font-size: clamp(38px, 5vw, 58px);
+    line-height: 1.13;
+    letter-spacing: -0.055em;
+}
+
+.products-hero p {
+    max-width: 480px;
+    margin: 18px 0 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.products-cta {
+    flex: 0 0 auto;
+    min-width: 190px;
+    height: 50px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 22px;
+    color: #172307;
+    background: linear-gradient(135deg, #a8e94f, #82cf36);
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 800;
+    box-shadow: 0 18px 40px rgba(124, 191, 48, 0.22);
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.product-card {
+    position: relative;
+    min-height: 230px;
+    padding: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(190, 230, 132, 0.22);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(155, 227, 91, 0.15), transparent 36%),
+        rgba(20, 28, 10, 0.70);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.product-card::after {
+    content: '';
+    position: absolute;
+    right: -36px;
+    bottom: -42px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: rgba(155, 227, 91, 0.07);
+}
+
+.product-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.product-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9be35b;
+    background: rgba(155, 227, 91, 0.12);
+    border: 1px solid rgba(155, 227, 91, 0.20);
+    border-radius: 14px;
+    font-size: 22px;
+}
+
+.product-category {
+    padding: 6px 10px;
+    color: rgba(235, 250, 210, 0.86);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.product-card h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    letter-spacing: -0.035em;
+}
+
+.product-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.product-factors {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(226, 244, 197, 0.82);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.product-factors i {
+    color: #9be35b;
+}
+
+@media (max-width: 980px) {
+    .products-nav {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 16px;
+        padding: 18px 24px;
+    }
+    .products-links {
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .products-links a.active::after {
+        display: none;
+    }
+    .products-wrap {
+        width: calc(100vw - 48px);
+        padding-top: 52px;
+    }
+    .products-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+    .products-cta {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="products-page">
+    <header class="products-nav">
+        <a href="{% url 'home' %}" class="products-brand">
+            <span class="products-logo"><i class="fas fa-seedling"></i></span>
+            <span>AgriPredict</span>
+        </a>
+        <nav class="products-links" aria-label="주 메뉴">
+            <a href="{% url 'home' %}"><i class="fas fa-house"></i> 홈</a>
+            <a href="/products/" class="active"><i class="fas fa-leaf"></i> 예측 상품</a>
+            <a href="/news/"><i class="far fa-newspaper"></i> 관련 뉴스</a>
+        </nav>
+    </header>
+
+    <main class="products-wrap">
+        <section class="products-hero">
+            <div>
+                <p class="products-eyebrow">예측 가능한 농산물 라인업</p>
+                <h1>주요 농산물 가격 정보를<br>한눈에 확인하세요</h1>
+                <p>품목별 가격 변동 요인과 예측 관점을 정리했습니다. 실제 예측은 대시보드에서 모델과 품목을 선택해 확인할 수 있습니다.</p>
+            </div>
+            <a href="{% url 'prediction_page' %}" class="products-cta">
+                예측하러 가기 <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <section class="product-grid" aria-label="예측 상품 목록">
+            {% for product in products %}
+            <article class="product-card">
+                <div class="product-top">
+                    <span class="product-icon"><i class="fas {{ product.icon }}"></i></span>
+                    <span class="product-category">{{ product.category }}</span>
+                </div>
+                <h2>{{ product.name }}</h2>
+                <p>{{ product.summary }}</p>
+                <div class="product-factors">
+                    <i class="fas fa-chart-simple"></i>
+                    <span>{{ product.factors }}</span>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </main>
+</div>
+{% endblock %}

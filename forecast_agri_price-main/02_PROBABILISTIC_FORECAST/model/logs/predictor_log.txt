@@ -1,0 +1,83 @@
+Beginning AutoGluon training... Time limit = 18000s
+AutoGluon will save models to 'C:\Users\minsoo\Desktop\chronos2\5_12_fin\outputs\predictor_baseline'
+=================== System Info ===================
+AutoGluon Version:  1.5.0
+Python Version:     3.11.15
+Operating System:   Windows
+Platform Machine:   AMD64
+Platform Version:   10.0.26200
+CPU Count:          20
+Pytorch Version:    2.9.1+cu128
+CUDA Version:       12.8
+GPU Memory:         GPU 0: 15.93/15.93 GB
+Total GPU Memory:   Free: 15.93 GB, Allocated: 0.00 GB, Total: 15.93 GB
+GPU Count:          1
+Memory Avail:       19.28 GB / 31.79 GB (60.6%)
+Disk Space Avail:   1179.72 GB / 1862.05 GB (63.4%)
+===================================================
+
+Fitting with arguments:
+{'enable_ensemble': False,
+ 'eval_metric': WQL,
+ 'hyperparameters': {'Chronos2': [{'ag_args': {'name_suffix': 'ZS_baseline'},
+                                   'context_length': 365,
+                                   'model_path': 'autogluon/chronos-2'},
+                                  {'ag_args': {'name_suffix': 'LoRA_baseline'},
+                                   'context_length': 365,
+                                   'fine_tune': True,
+                                   'fine_tune_batch_size': 16,
+                                   'fine_tune_lora_config': {'lora_alpha': 32,
+                                                             'r': 16},
+                                   'fine_tune_lr': 5e-05,
+                                   'fine_tune_mode': 'lora',
+                                   'fine_tune_steps': 4000,
+                                   'model_path': 'autogluon/chronos-2'}]},
+ 'known_covariates_names': ['market_rest',
+                            'weather_temp_range',
+                            'weather_sunshine_dur',
+                            'bok_base_rate',
+                            'cpi_growth_rate'],
+ 'num_val_windows': 1,
+ 'prediction_length': 10,
+ 'quantile_levels': [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+ 'random_seed': 123,
+ 'refit_every_n_windows': 1,
+ 'refit_full': False,
+ 'skip_model_selection': False,
+ 'target': 'target',
+ 'time_limit': 18000,
+ 'verbosity': 2}
+
+Inferred time series frequency: 'D'
+Provided train_data has 139242 rows, 46 time series. Median time series length is 3027 (min=3027, max=3027). 
+
+Provided data contains following columns:
+	target: 'target'
+	known_covariates:
+		categorical:        []
+		continuous (float): ['market_rest', 'weather_temp_range', 'weather_sunshine_dur', 'bok_base_rate', 'cpi_growth_rate']
+	past_covariates:
+		categorical:        []
+		continuous (float): ['amount', 'oil_tax_free_diesel', 'weather_rain_sum', 'weather_wind_avg', 'weather_humidity_avg', 'weather_pressure_avg', ...]
+
+To learn how to fix incorrectly inferred types, please see documentation for TimeSeriesPredictor.fit
+
+AutoGluon will gauge predictive performance using evaluation metric: 'WQL'
+	This metric's sign has been flipped to adhere to being higher_is_better. The metric score can be multiplied by -1 to get the metric value.
+===================================================
+
+Starting training. Start time is 2026-05-12 15:38:51
+Models that will be trained: ['Chronos2ZS_baseline', 'Chronos2LoRA_baseline']
+Training timeseries model Chronos2ZS_baseline. Training for up to 8999.3s of the 17998.6s of remaining time.
+	-0.1284       = Validation score (-WQL)
+	5.03    s     = Training runtime
+	1.00    s     = Validation (prediction) runtime
+Training timeseries model Chronos2LoRA_baseline. Training for up to 17992.5s of the 17992.5s of remaining time.
+	-0.1358       = Validation score (-WQL)
+	494.48  s     = Training runtime
+	0.32    s     = Validation (prediction) runtime
+Training complete. Models trained: ['Chronos2ZS_baseline', 'Chronos2LoRA_baseline']
+Total runtime: 500.85 s
+Best model: Chronos2ZS_baseline
+Best model score: -0.1284
+Additional data provided, testing on additional data. Resulting leaderboard will be sorted according to test score (`score_test`).

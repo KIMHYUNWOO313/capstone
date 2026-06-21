@@ -1,0 +1,7 @@
+openai>=1.50
+python-dotenv>=1.0
+requests>=2.31
+pypdf>=4.0
+pandas>=2.0
+pyarrow>=14.0
+numpy>=1.26

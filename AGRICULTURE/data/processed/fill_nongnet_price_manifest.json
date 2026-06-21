@@ -1,0 +1,216 @@
+{
+  "in_dir": "C:\\Users\\user\\capstone\\AGRICULTURE\\data\\processed\\nongnet_by_series",
+  "out_dir": "C:\\Users\\user\\capstone\\AGRICULTURE\\data\\processed\\nongnet_by_series_filled",
+  "files": [
+    {
+      "file": "감자_감자(전체)_20kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\감자_감자(전체)_20kg_상품.csv"
+    },
+    {
+      "file": "감자_감자(전체)_20kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\감자_감자(전체)_20kg_중품.csv"
+    },
+    {
+      "file": "고구마_고구마(전체)_1kg_상품.csv",
+      "rows": 2753,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\고구마_고구마(전체)_1kg_상품.csv"
+    },
+    {
+      "file": "고구마_고구마(전체)_1kg_중품.csv",
+      "rows": 2753,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\고구마_고구마(전체)_1kg_중품.csv"
+    },
+    {
+      "file": "느타리버섯_느타리버섯(전체)_100g_중품.csv",
+      "rows": 1831,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\느타리버섯_느타리버섯(전체)_100g_중품.csv"
+    },
+    {
+      "file": "당근_당근(전체)_10kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\당근_당근(전체)_10kg_중품.csv"
+    },
+    {
+      "file": "당근_당근(전체)_20kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\당근_당근(전체)_20kg_상품.csv"
+    },
+    {
+      "file": "당근_당근(전체)_20kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\당근_당근(전체)_20kg_중품.csv"
+    },
+    {
+      "file": "딸기_딸기(전체)_2kg_상품.csv",
+      "rows": 1217,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\딸기_딸기(전체)_2kg_상품.csv"
+    },
+    {
+      "file": "딸기_딸기(전체)_2kg_중품.csv",
+      "rows": 1217,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\딸기_딸기(전체)_2kg_중품.csv"
+    },
+    {
+      "file": "무_무(전체)_18kg_상품.csv",
+      "rows": 946,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\무_무(전체)_18kg_상품.csv"
+    },
+    {
+      "file": "무_무(전체)_18kg_중품.csv",
+      "rows": 946,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\무_무(전체)_18kg_중품.csv"
+    },
+    {
+      "file": "무_무(전체)_20kg_상품.csv",
+      "rows": 1806,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\무_무(전체)_20kg_상품.csv"
+    },
+    {
+      "file": "무_무(전체)_20kg_중품.csv",
+      "rows": 1806,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\무_무(전체)_20kg_중품.csv"
+    },
+    {
+      "file": "배_배(전체)_15kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\배_배(전체)_15kg_상품.csv"
+    },
+    {
+      "file": "배_배(전체)_15kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\배_배(전체)_15kg_중품.csv"
+    },
+    {
+      "file": "사과_사과(전체)_10kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\사과_사과(전체)_10kg_상품.csv"
+    },
+    {
+      "file": "사과_사과(전체)_10kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\사과_사과(전체)_10kg_중품.csv"
+    },
+    {
+      "file": "시금치_시금치(전체)_4kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\시금치_시금치(전체)_4kg_상품.csv"
+    },
+    {
+      "file": "시금치_시금치(전체)_4kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\시금치_시금치(전체)_4kg_중품.csv"
+    },
+    {
+      "file": "열무_열무(전체)_4kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\열무_열무(전체)_4kg_상품.csv"
+    },
+    {
+      "file": "열무_열무(전체)_4kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\열무_열무(전체)_4kg_중품.csv"
+    },
+    {
+      "file": "오렌지_오렌지(전체)_18kg_상품.csv",
+      "rows": 2522,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\오렌지_오렌지(전체)_18kg_상품.csv"
+    },
+    {
+      "file": "오렌지_오렌지(전체)_18kg_중품.csv",
+      "rows": 2522,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\오렌지_오렌지(전체)_18kg_중품.csv"
+    },
+    {
+      "file": "콩_콩(전체)_35kg_상품.csv",
+      "rows": 1768,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\콩_콩(전체)_35kg_상품.csv"
+    },
+    {
+      "file": "콩_콩(전체)_35kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\콩_콩(전체)_35kg_중품.csv"
+    },
+    {
+      "file": "콩_콩(전체)_40kg_상품.csv",
+      "rows": 984,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\콩_콩(전체)_40kg_상품.csv"
+    },
+    {
+      "file": "콩_콩(전체)_40kg_중품.csv",
+      "rows": 984,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\콩_콩(전체)_40kg_중품.csv"
+    },
+    {
+      "file": "팽이버섯_팽이버섯(전체)_5kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\팽이버섯_팽이버섯(전체)_5kg_상품.csv"
+    },
+    {
+      "file": "팽이버섯_팽이버섯(전체)_5kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\팽이버섯_팽이버섯(전체)_5kg_중품.csv"
+    },
+    {
+      "file": "풋고추_풋고추(전체)_10kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\풋고추_풋고추(전체)_10kg_상품.csv"
+    },
+    {
+      "file": "풋고추_풋고추(전체)_10kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\풋고추_풋고추(전체)_10kg_중품.csv"
+    },
+    {
+      "file": "풋고추_풋고추(전체)_4kg_상품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\풋고추_풋고추(전체)_4kg_상품.csv"
+    },
+    {
+      "file": "풋고추_풋고추(전체)_4kg_중품.csv",
+      "rows": 2752,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\풋고추_풋고추(전체)_4kg_중품.csv"
+    },
+    {
+      "file": "호두_호두(전체)_100g_중품.csv",
+      "rows": 2753,
+      "cells_filled": 0,
+      "output": "data\\processed\\nongnet_by_series_filled\\호두_호두(전체)_100g_중품.csv"
+    }
+  ]
+}

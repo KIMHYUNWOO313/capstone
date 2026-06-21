@@ -1,0 +1,7 @@
+timesfm>=2.0.0
+torch>=2.0
+pandas>=2.0
+pyarrow>=14.0
+numpy>=1.26
+huggingface-hub>=0.20
+safetensors>=0.4

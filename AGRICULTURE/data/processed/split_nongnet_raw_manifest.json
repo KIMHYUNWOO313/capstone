@@ -1,0 +1,286 @@
+{
+  "src_dir": "C:\\Users\\user\\capstone\\data\\농넷 데이터",
+  "out_dir": "C:\\Users\\user\\capstone\\AGRICULTURE\\data\\processed\\nongnet_by_series",
+  "series": [
+    {
+      "source": "감자.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\감자_감자(전체)_20kg_상품.csv",
+      "품종": "감자(전체)",
+      "거래단위": "20kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "감자.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\감자_감자(전체)_20kg_중품.csv",
+      "품종": "감자(전체)",
+      "거래단위": "20kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "고구마.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\고구마_고구마(전체)_1kg_상품.csv",
+      "품종": "고구마(전체)",
+      "거래단위": "1kg",
+      "등급": "상품",
+      "rows": 2753
+    },
+    {
+      "source": "고구마.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\고구마_고구마(전체)_1kg_중품.csv",
+      "품종": "고구마(전체)",
+      "거래단위": "1kg",
+      "등급": "중품",
+      "rows": 2753
+    },
+    {
+      "source": "느타리버섯.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\느타리버섯_느타리버섯(전체)_100g_중품.csv",
+      "품종": "느타리버섯(전체)",
+      "거래단위": "100g",
+      "등급": "중품",
+      "rows": 1831
+    },
+    {
+      "source": "당근.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\당근_당근(전체)_10kg_중품.csv",
+      "품종": "당근(전체)",
+      "거래단위": "10kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "당근.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\당근_당근(전체)_20kg_상품.csv",
+      "품종": "당근(전체)",
+      "거래단위": "20kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "당근.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\당근_당근(전체)_20kg_중품.csv",
+      "품종": "당근(전체)",
+      "거래단위": "20kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "딸기.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\딸기_딸기(전체)_2kg_상품.csv",
+      "품종": "딸기(전체)",
+      "거래단위": "2kg",
+      "등급": "상품",
+      "rows": 1217
+    },
+    {
+      "source": "딸기.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\딸기_딸기(전체)_2kg_중품.csv",
+      "품종": "딸기(전체)",
+      "거래단위": "2kg",
+      "등급": "중품",
+      "rows": 1217
+    },
+    {
+      "source": "무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\무_무(전체)_20kg_상품.csv",
+      "품종": "무(전체)",
+      "거래단위": "20kg",
+      "등급": "상품",
+      "rows": 1806
+    },
+    {
+      "source": "무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\무_무(전체)_20kg_중품.csv",
+      "품종": "무(전체)",
+      "거래단위": "20kg",
+      "등급": "중품",
+      "rows": 1806
+    },
+    {
+      "source": "무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\무_무(전체)_18kg_상품.csv",
+      "품종": "무(전체)",
+      "거래단위": "18kg",
+      "등급": "상품",
+      "rows": 946
+    },
+    {
+      "source": "무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\무_무(전체)_18kg_중품.csv",
+      "품종": "무(전체)",
+      "거래단위": "18kg",
+      "등급": "중품",
+      "rows": 946
+    },
+    {
+      "source": "배.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\배_배(전체)_15kg_상품.csv",
+      "품종": "배(전체)",
+      "거래단위": "15kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "배.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\배_배(전체)_15kg_중품.csv",
+      "품종": "배(전체)",
+      "거래단위": "15kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "사과.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\사과_사과(전체)_10kg_상품.csv",
+      "품종": "사과(전체)",
+      "거래단위": "10kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "사과.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\사과_사과(전체)_10kg_중품.csv",
+      "품종": "사과(전체)",
+      "거래단위": "10kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "시금치.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\시금치_시금치(전체)_4kg_상품.csv",
+      "품종": "시금치(전체)",
+      "거래단위": "4kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "시금치.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\시금치_시금치(전체)_4kg_중품.csv",
+      "품종": "시금치(전체)",
+      "거래단위": "4kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "열무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\열무_열무(전체)_4kg_상품.csv",
+      "품종": "열무(전체)",
+      "거래단위": "4kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "열무.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\열무_열무(전체)_4kg_중품.csv",
+      "품종": "열무(전체)",
+      "거래단위": "4kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "오렌지.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\오렌지_오렌지(전체)_18kg_상품.csv",
+      "품종": "오렌지(전체)",
+      "거래단위": "18kg",
+      "등급": "상품",
+      "rows": 2522
+    },
+    {
+      "source": "오렌지.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\오렌지_오렌지(전체)_18kg_중품.csv",
+      "품종": "오렌지(전체)",
+      "거래단위": "18kg",
+      "등급": "중품",
+      "rows": 2522
+    },
+    {
+      "source": "콩.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\콩_콩(전체)_35kg_중품.csv",
+      "품종": "콩(전체)",
+      "거래단위": "35kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "콩.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\콩_콩(전체)_40kg_상품.csv",
+      "품종": "콩(전체)",
+      "거래단위": "40kg",
+      "등급": "상품",
+      "rows": 984
+    },
+    {
+      "source": "콩.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\콩_콩(전체)_40kg_중품.csv",
+      "품종": "콩(전체)",
+      "거래단위": "40kg",
+      "등급": "중품",
+      "rows": 984
+    },
+    {
+      "source": "콩.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\콩_콩(전체)_35kg_상품.csv",
+      "품종": "콩(전체)",
+      "거래단위": "35kg",
+      "등급": "상품",
+      "rows": 1768
+    },
+    {
+      "source": "팽이버섯.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\팽이버섯_팽이버섯(전체)_5kg_상품.csv",
+      "품종": "팽이버섯(전체)",
+      "거래단위": "5kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "팽이버섯.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\팽이버섯_팽이버섯(전체)_5kg_중품.csv",
+      "품종": "팽이버섯(전체)",
+      "거래단위": "5kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "풋고추.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\풋고추_풋고추(전체)_4kg_상품.csv",
+      "품종": "풋고추(전체)",
+      "거래단위": "4kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "풋고추.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\풋고추_풋고추(전체)_4kg_중품.csv",
+      "품종": "풋고추(전체)",
+      "거래단위": "4kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "풋고추.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\풋고추_풋고추(전체)_10kg_상품.csv",
+      "품종": "풋고추(전체)",
+      "거래단위": "10kg",
+      "등급": "상품",
+      "rows": 2752
+    },
+    {
+      "source": "풋고추.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\풋고추_풋고추(전체)_10kg_중품.csv",
+      "품종": "풋고추(전체)",
+      "거래단위": "10kg",
+      "등급": "중품",
+      "rows": 2752
+    },
+    {
+      "source": "호두.xlsx",
+      "output": "data\\processed\\nongnet_by_series\\호두_호두(전체)_100g_중품.csv",
+      "품종": "호두(전체)",
+      "거래단위": "100g",
+      "등급": "중품",
+      "rows": 2753
+    }
+  ]
+}

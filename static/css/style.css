@@ -1,0 +1,598 @@
+/* ============================================================
+   Design tokens · Light & Dark
+   ============================================================ */
+:root {
+    /* Surfaces */
+    --bg-primary: #f6f7fb;
+    --bg-soft: #eef0f6;
+    --bg-card: rgba(255, 255, 255, 0.78);
+    --bg-elevated: #ffffff;
+    --bg-secondary: #f1f3f9;
+
+    /* Text */
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+
+    /* Accent */
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --accent-strong: #4338ca;
+    --accent-hover: #6366f1;
+    --accent-glow: rgba(79, 70, 229, 0.18);
+    --accent-2: #06b6d4;
+    --accent-3: #a855f7;
+
+    /* Status */
+    --success: #16a34a;
+    --warning: #d97706;
+    --danger: #dc2626;
+
+    /* Lines & shadows */
+    --border: rgba(15, 23, 42, 0.08);
+    --border-strong: rgba(15, 23, 42, 0.14);
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 24px 48px -12px rgba(15, 23, 42, 0.18);
+    --shadow-glow: 0 12px 40px -12px var(--accent-glow);
+
+    /* Radii & motion */
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-pill: 999px;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Background scenery (light) */
+    --scene-1: radial-gradient(circle at 12% 18%, rgba(79, 70, 229, 0.18), transparent 55%);
+    --scene-2: radial-gradient(circle at 88% 12%, rgba(6, 182, 212, 0.18), transparent 55%);
+    --scene-3: radial-gradient(circle at 70% 90%, rgba(168, 85, 247, 0.16), transparent 60%);
+}
+
+[data-theme="dark"] {
+    --bg-primary: #0b0c10;
+    --bg-soft: #11131a;
+    --bg-card: rgba(20, 22, 30, 0.72);
+    --bg-elevated: #161821;
+    --bg-secondary: #161821;
+
+    --text-primary: #f5f6fa;
+    --text-secondary: #c2c6d2;
+    --text-muted: #8a90a2;
+
+    --accent: #818cf8;
+    --accent-soft: rgba(129, 140, 248, 0.12);
+    --accent-strong: #a5b4fc;
+    --accent-hover: #a5b4fc;
+    --accent-glow: rgba(129, 140, 248, 0.35);
+    --accent-2: #22d3ee;
+    --accent-3: #c084fc;
+
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 30px 60px -20px rgba(0, 0, 0, 0.65);
+    --shadow-glow: 0 12px 40px -12px var(--accent-glow);
+
+    --scene-1: radial-gradient(circle at 12% 18%, rgba(99, 102, 241, 0.22), transparent 55%);
+    --scene-2: radial-gradient(circle at 88% 12%, rgba(34, 211, 238, 0.18), transparent 55%);
+    --scene-3: radial-gradient(circle at 70% 90%, rgba(192, 132, 252, 0.18), transparent 60%);
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--bg-primary);
+    background-image: var(--scene-1), var(--scene-2), var(--scene-3);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.4s var(--ease), color 0.3s var(--ease);
+}
+
+::selection {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ============================================================
+   Theme toggle
+   ============================================================ */
+.theme-toggle-fixed {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: var(--shadow-md);
+    transition: transform 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease), border-color 0.25s var(--ease);
+}
+
+.theme-toggle-fixed:hover {
+    transform: translateY(-2px) rotate(-8deg);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.theme-toggle-fixed:active {
+    transform: translateY(0) rotate(0deg);
+}
+
+/* ============================================================
+   Home page
+   ============================================================ */
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 1.5rem;
+}
+
+.home-container::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background:
+        radial-gradient(circle at 20% 20%, var(--accent-glow), transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(6, 182, 212, 0.18), transparent 50%),
+        radial-gradient(circle at 50% 90%, rgba(168, 85, 247, 0.18), transparent 55%);
+    filter: blur(50px);
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 18s var(--ease) infinite alternate;
+}
+
+@keyframes drift {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(2%, -2%, 0); }
+}
+
+.floating-elements {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.float-item {
+    position: absolute;
+    font-size: 2.4rem;
+    opacity: 0.18;
+    color: var(--accent);
+    animation: float 9s ease-in-out infinite;
+}
+
+.float-item.item-1 { top: 12%; left: 12%; animation-delay: 0s; }
+.float-item.item-2 { top: 22%; right: 18%; animation-delay: 1s; }
+.float-item.item-3 { bottom: 28%; left: 8%; animation-delay: 2s; }
+.float-item.item-4 { bottom: 18%; right: 12%; animation-delay: 3s; }
+.float-item.item-5 { top: 42%; left: 4%; animation-delay: 4s; }
+.float-item.item-6 { top: 60%; right: 6%; animation-delay: 5s; }
+.float-item.item-7 { bottom: 50%; right: 24%; animation-delay: 6s; }
+.float-item.item-8 { top: 14%; left: 50%; animation-delay: 7s; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-22px) rotate(6deg); }
+}
+
+.patch-note-dummy,
+.review-dummy {
+    position: absolute;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: var(--shadow-sm);
+    animation: float 11s ease-in-out infinite;
+}
+
+.dummy-label,
+.stars {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.patch-note-dummy.dummy-1 { top: 25%; right: 10%; animation-delay: 0.5s; }
+.patch-note-dummy.dummy-2 { bottom: 32%; left: 8%; animation-delay: 2.5s; }
+.patch-note-dummy.dummy-3 { top: 55%; right: 30%; animation-delay: 4.5s; }
+.review-dummy.review-1 { top: 35%; left: 25%; animation-delay: 1.5s; }
+.review-dummy.review-2 { bottom: 45%; right: 12%; animation-delay: 3.5s; }
+.review-dummy.review-3 { top: 70%; left: 15%; animation-delay: 5.5s; }
+
+.home-content {
+    text-align: center;
+    z-index: 10;
+    padding: 2rem;
+    max-width: 720px;
+}
+
+.home-title {
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, var(--accent-3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.85rem;
+}
+
+.home-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+}
+
+.btn-get-started {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+
+.btn-get-started:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px -12px var(--accent-glow);
+}
+
+.btn-get-started i {
+    transition: transform 0.25s var(--ease);
+}
+
+.btn-get-started:hover i {
+    transform: translateX(4px);
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   Responsive base
+   ============================================================ */
+@media (max-width: 768px) {
+    .theme-toggle-fixed {
+        top: 16px;
+        right: 16px;
+        width: 42px;
+        height: 42px;
+    }
+}
+
+/* ============================================================
+   AgriPredict landing page
+   ============================================================ */
+.agri-home {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #fff;
+    background-image:
+        linear-gradient(90deg, rgba(5, 9, 5, 0.90) 0%, rgba(5, 9, 5, 0.74) 31%, rgba(5, 9, 5, 0.36) 58%, rgba(5, 9, 5, 0.20) 100%),
+        linear-gradient(180deg, rgba(0, 0, 0, 0.42) 0%, rgba(0, 0, 0, 0.08) 38%, rgba(0, 0, 0, 0.70) 100%),
+        var(--home-bg);
+    background-size: cover;
+    background-position: center;
+    isolation: isolate;
+}
+
+.agri-home::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 34%;
+    background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.46));
+    z-index: -1;
+}
+
+.agri-home-nav {
+    height: 66px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 36px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(5, 8, 5, 0.56);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.agri-home-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.agri-home-logo {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9be35b;
+    background: rgba(120, 170, 48, 0.18);
+    border: 1px solid rgba(159, 224, 91, 0.30);
+    border-radius: 10px;
+    box-shadow: 0 0 26px rgba(139, 195, 74, 0.18);
+}
+
+.agri-home-links {
+    display: flex;
+    align-items: center;
+    gap: 54px;
+}
+
+.agri-home-links a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.88);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.2s var(--ease);
+}
+
+.agri-home-links a:hover,
+.agri-home-links a.active {
+    color: #9be35b;
+}
+
+.agri-home-links a.active::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -22px;
+    width: 52px;
+    height: 2px;
+    transform: translateX(-50%);
+    background: #9be35b;
+    box-shadow: 0 0 16px rgba(155, 227, 91, 0.8);
+}
+
+.agri-home-hero {
+    width: min(980px, calc(100vw - 96px));
+    margin-left: 62px;
+    padding-top: clamp(70px, 9vw, 104px);
+}
+
+.agri-home-eyebrow {
+    margin-bottom: 20px;
+    color: #9be35b;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.agri-home-hero h1 {
+    margin: 0;
+    max-width: 620px;
+    color: #fff;
+    font-size: clamp(50px, 6.4vw, 76px);
+    line-height: 1.12;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+    text-shadow: 0 16px 42px rgba(0, 0, 0, 0.34);
+}
+
+.agri-home-copy {
+    margin-top: 28px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 19px;
+    line-height: 1.72;
+    letter-spacing: -0.02em;
+}
+
+.agri-home-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.home-btn {
+    min-width: 206px;
+    height: 54px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.home-btn:hover {
+    transform: translateY(-2px);
+}
+
+.home-btn-primary {
+    color: #162109;
+    background: linear-gradient(135deg, #a8e94f, #82cf36);
+    box-shadow: 0 18px 40px rgba(124, 191, 48, 0.22);
+}
+
+.home-btn-ghost {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(178, 231, 105, 0.72);
+}
+
+.home-btn-ghost:hover {
+    background: rgba(139, 195, 74, 0.12);
+}
+
+.agri-home-feature-panel {
+    position: absolute;
+    left: 50%;
+    bottom: 44px;
+    width: min(1085px, calc(100vw - 156px));
+    min-height: 108px;
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border: 1px solid rgba(190, 230, 132, 0.24);
+    border-radius: 8px;
+    background: rgba(20, 28, 10, 0.68);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.agri-home-feature {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 26px 34px;
+    color: rgba(255, 255, 255, 0.88);
+    border-right: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.agri-home-feature:last-child {
+    border-right: 0;
+}
+
+.agri-home-feature span {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9be35b;
+    background: rgba(155, 227, 91, 0.12);
+    border-radius: 10px;
+    font-size: 23px;
+}
+
+.agri-home-feature strong {
+    font-size: 16px;
+    line-height: 1.45;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+@media (max-width: 980px) {
+    .agri-home-nav {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 16px;
+        padding: 18px 24px;
+    }
+    .agri-home-links {
+        gap: 24px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .agri-home-links a.active::after {
+        display: none;
+    }
+    .agri-home-hero {
+        width: calc(100vw - 48px);
+        margin-left: 24px;
+        padding-top: 54px;
+    }
+    .agri-home-feature-panel {
+        position: relative;
+        left: auto;
+        bottom: auto;
+        width: calc(100vw - 48px);
+        margin: 56px 24px 32px;
+        transform: none;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .agri-home {
+        min-height: auto;
+    }
+    .agri-home-hero h1 {
+        font-size: 42px;
+    }
+    .agri-home-copy {
+        font-size: 16px;
+    }
+    .agri-home-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .home-btn {
+        width: 100%;
+    }
+    .agri-home-feature-panel {
+        grid-template-columns: 1fr;
+    }
+    .agri-home-feature {
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .agri-home-feature:last-child {
+        border-bottom: 0;
+    }
+}

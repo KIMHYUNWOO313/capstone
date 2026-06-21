@@ -1,0 +1,16 @@
+{
+  "apple_fuji_box10kg_high": {
+    "explanation": "사과(후지)의 가격은 기상 악화(서리)로 인해 수확량이 감소하여 상승할 것으로 예상됩니다.",
+    "_meta": {
+      "model": "gpt-4o",
+      "web_search_calls": 0
+    }
+  },
+  "onion_kg1_high": {
+    "explanation": "양파 가격은 수확기 도래에 따른 공급 증가로 하락세를 보일 전망입니다.",
+    "_meta": {
+      "model": "gpt-4o",
+      "web_search_calls": 1
+    }
+  }
+}

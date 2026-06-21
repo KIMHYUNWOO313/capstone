@@ -1,0 +1,4 @@
+name,lora_r,lora_alpha,lr,num_samples,epochs,val_loss,elapsed_min
+lora_r4_a8_lr1e4,4,8,0.0001,2000,3,0.6109594255685806,3.34
+lora_r8_a16_lr1e4,8,16,0.0001,2000,3,0.5829130212465922,3.3
+lora_r16_a32_lr5e5,16,32,5e-05,2000,3,0.6079095999399821,3.29

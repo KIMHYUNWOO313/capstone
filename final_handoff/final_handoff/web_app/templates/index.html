@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>농산물 가격 예측</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f4ec;
+      --panel: #fffaf0;
+      --ink: #1f2933;
+      --muted: #677281;
+      --line: #ded6c8;
+      --accent: #23633b;
+      --accent-2: #c96f2d;
+      --danger: #a43b35;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #e5f0da, transparent 32rem), var(--bg);
+      color: var(--ink);
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(32px, 5vw, 56px);
+      letter-spacing: -0.05em;
+      line-height: 1.04;
+    }
+    p { color: var(--muted); line-height: 1.7; }
+    .card {
+      background: rgba(255, 250, 240, 0.86);
+      border: 1px solid var(--line);
+      box-shadow: 0 20px 60px rgba(58, 46, 28, 0.12);
+      border-radius: 24px;
+      padding: 22px;
+      backdrop-filter: blur(8px);
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 14px;
+      align-items: end;
+    }
+    label {
+      display: grid;
+      gap: 8px;
+      color: #384351;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    select, button {
+      min-height: 46px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      padding: 0 14px;
+      font: inherit;
+      background: white;
+      color: var(--ink);
+    }
+    button {
+      border: 0;
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      min-width: 130px;
+    }
+    button:disabled {
+      cursor: wait;
+      opacity: 0.72;
+    }
+    .model-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin: 24px 0;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 0 11px;
+      background: #e3ecd9;
+      color: #1f5c36;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .status {
+      min-height: 24px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .status.error { color: var(--danger); }
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 34px 0 12px;
+    }
+    h2 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.03em;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: white;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee6d9;
+      text-align: right;
+      white-space: nowrap;
+    }
+    th:first-child, td:first-child,
+    th:nth-child(2), td:nth-child(2) { text-align: left; }
+    th {
+      position: sticky;
+      top: 0;
+      background: #fbf6eb;
+      color: #53606f;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+    }
+    @media (max-width: 760px) {
+      header, .controls, .model-grid { grid-template-columns: 1fr; }
+      main { padding-top: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <span class="badge">Final Handoff Forecast</span>
+        <h1>농산물 가격 예측 웹</h1>
+        <p>
+          POINT_FORECAST는 TimesFM 2.5 Zero-Shot으로 3일 평균 가격을 예측하고,
+          PROBABILISTIC_FORECAST는 Chronos2 LoRA로 10일 분위수와 평균을 예측합니다.
+        </p>
+      </div>
+      <div class="card">
+        <strong>운영 메모</strong>
+        <p>
+          Chronos2의 미래 known covariate는 외부 API가 연결되기 전까지
+          최신 관측값으로 채웁니다. 모델 문서의 예제 흐름과 동일한 데이터/모델을 사용합니다.
+        </p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="controls">
+        <label>
+          모델 선택
+          <select id="model">
+            <option value="both">둘 다 실행</option>
+            <option value="point">POINT_FORECAST - TimesFM 3일 점예측</option>
+            <option value="probabilistic">PROBABILISTIC_FORECAST - Chronos2 10일 확률범위</option>
+          </select>
+        </label>
+        <label>
+          품목 선택
+          <select id="item">
+            <option value="">전체 품목</option>
+          </select>
+        </label>
+        <button id="run">예측 실행</button>
+      </div>
+      <div id="status" class="status">품목 목록을 불러오는 중입니다.</div>
+    </section>
+
+    <section id="results"></section>
+  </main>
+
+  <script>
+    const itemSelect = document.querySelector("#item");
+    const modelSelect = document.querySelector("#model");
+    const runButton = document.querySelector("#run");
+    const statusEl = document.querySelector("#status");
+    const resultsEl = document.querySelector("#results");
+
+    const formatNumber = (value) => {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "-";
+      return Math.round(Number(value)).toLocaleString("ko-KR");
+    };
+
+    async function loadItems() {
+      try {
+        const res = await fetch("/api/items");
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        for (const item of data.items) {
+          const opt = document.createElement("option");
+          opt.value = item;
+          opt.textContent = item;
+          itemSelect.appendChild(opt);
+        }
+        statusEl.textContent = `${data.items.length}개 품목을 불러왔습니다. 첫 예측은 모델 로딩 때문에 시간이 걸릴 수 있습니다.`;
+      } catch (err) {
+        statusEl.textContent = `품목 목록 로딩 실패: ${err.message}`;
+        statusEl.classList.add("error");
+      }
+    }
+
+    function renderPoint(rows) {
+      return `
+        <div class="section-title">
+          <h2>TimesFM 3일 점예측</h2>
+          <span class="badge">${rows.length} rows</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>item_id</th><th>date</th><th>step</th><th>y_pred</th></tr>
+            </thead>
+            <tbody>
+              ${rows.map((r) => `
+                <tr>
+                  <td>${r.item_id}</td>
+                  <td>${r.timestamp}</td>
+                  <td>${r.horizon_step}</td>
+                  <td>${formatNumber(r.y_pred)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderProb(rows) {
+      return `
+        <div class="section-title">
+          <h2>Chronos2 LoRA 10일 확률범위</h2>
+          <span class="badge">${rows.length} rows</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>item_id</th><th>date</th><th>mean</th><th>p10</th><th>p20</th>
+                <th>p50</th><th>p80</th><th>p90</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((r) => `
+                <tr>
+                  <td>${r.item_id}</td>
+                  <td>${r.timestamp}</td>
+                  <td>${formatNumber(r.mean)}</td>
+                  <td>${formatNumber(r.p10)}</td>
+                  <td>${formatNumber(r.p20)}</td>
+                  <td>${formatNumber(r.p50)}</td>
+                  <td>${formatNumber(r.p80)}</td>
+                  <td>${formatNumber(r.p90)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    async function runForecast() {
+      runButton.disabled = true;
+      resultsEl.innerHTML = "";
+      statusEl.classList.remove("error");
+      statusEl.textContent = "예측 실행 중입니다. 첫 실행은 모델 다운로드/로딩 때문에 수 분 걸릴 수 있습니다.";
+
+      try {
+        const payload = {
+          model: modelSelect.value,
+          item_id: itemSelect.value || null,
+        };
+        const res = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const blocks = [];
+        if (data.outputs.point) blocks.push(renderPoint(data.outputs.point.rows));
+        if (data.outputs.probabilistic) blocks.push(renderProb(data.outputs.probabilistic.rows));
+        resultsEl.innerHTML = blocks.join("") || `<div class="empty">결과가 없습니다.</div>`;
+        statusEl.textContent = `예측 완료: ${new Date(data.generated_at).toLocaleString("ko-KR")}`;
+      } catch (err) {
+        statusEl.textContent = `예측 실패: ${err.message}`;
+        statusEl.classList.add("error");
+      } finally {
+        runButton.disabled = false;
+      }
+    }
+
+    runButton.addEventListener("click", runForecast);
+    loadItems();
+  </script>
+</body>
+</html>

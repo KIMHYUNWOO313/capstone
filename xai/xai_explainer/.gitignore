@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 환경
+.env
+.venv/
+venv/
+
+# 실행 산출물
+outputs/*.json
+outputs/dry_run/
+
+# OS
+.DS_Store
+Thumbs.db

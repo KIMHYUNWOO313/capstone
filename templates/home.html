@@ -1,0 +1,574 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% block title %}AgriPredict - Home{% endblock %}
+{% block theme_toggle %}{% endblock %}
+{% block extra_css %}
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root {
+    --apple-bg: #f5f5f7;
+    --apple-card: #ffffff;
+    --apple-text: #1d1d1f;
+    --apple-muted: #6e6e73;
+    --apple-link: #0066cc;
+    --apple-green: #2d6a2f;
+    --apple-line: rgba(0, 0, 0, 0.10);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--apple-bg); }
+body { margin: 0; background: var(--apple-bg); }
+
+.apple-home {
+    min-height: 100vh;
+    color: var(--apple-text);
+    background: var(--apple-bg);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
+}
+
+.apple-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 44px;
+    background: rgba(245, 245, 247, 0.78);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.apple-nav-inner {
+    width: min(1024px, calc(100vw - 36px));
+    height: 44px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.apple-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--apple-text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    opacity: .92;
+}
+
+.apple-brand-mark {
+    width: 18px;
+    height: 18px;
+    display: inline-grid;
+    place-items: center;
+    color: var(--apple-green);
+    font-size: 15px;
+}
+
+.apple-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(18px, 4vw, 42px);
+    flex: 1;
+}
+
+.apple-links a,
+.apple-nav-cta {
+    color: rgba(29, 29, 31, .78);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    transition: color .18s ease;
+}
+
+.apple-links a:hover,
+.apple-links a.active,
+.apple-nav-cta:hover { color: #000; }
+
+.apple-section {
+    position: relative;
+    min-height: 692px;
+    overflow: hidden;
+    text-align: center;
+    background: var(--apple-card);
+    border-bottom: 12px solid var(--apple-bg);
+}
+
+.apple-hero {
+    min-height: calc(100vh - 44px);
+    background:
+        radial-gradient(circle at 50% 100%, rgba(126, 173, 86, .18), transparent 34%),
+        linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 100%);
+}
+
+.apple-copy {
+    position: relative;
+    z-index: 2;
+    width: min(820px, calc(100vw - 40px));
+    margin: 0 auto;
+    padding-top: clamp(58px, 9vh, 92px);
+}
+
+.apple-eyebrow {
+    margin: 0 0 10px;
+    color: #2d6a2f;
+    font-size: 19px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.apple-title {
+    margin: 0;
+    color: var(--apple-text);
+    font-size: clamp(48px, 7.5vw, 86px);
+    line-height: .96;
+    font-weight: 800;
+    letter-spacing: -0.065em;
+}
+
+.apple-subtitle {
+    margin: 16px auto 0;
+    max-width: 680px;
+    color: var(--apple-text);
+    font-size: clamp(22px, 3.1vw, 31px);
+    line-height: 1.18;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+}
+
+.apple-actions {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+}
+
+.apple-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--apple-link);
+    text-decoration: none;
+    font-size: 21px;
+    line-height: 1.25;
+    font-weight: 400;
+    letter-spacing: -0.03em;
+}
+
+.apple-link:hover { text-decoration: underline; }
+.apple-link i { font-size: 13px; margin-top: 2px; }
+
+.apple-device {
+    position: relative;
+    z-index: 1;
+    width: min(1060px, calc(100vw - 42px));
+    margin: clamp(34px, 6vh, 58px) auto 0;
+    border-radius: 34px 34px 0 0;
+    background: #111;
+    box-shadow: 0 40px 90px rgba(0,0,0,.18);
+    padding: 10px 10px 0;
+}
+
+.apple-device img {
+    display: block;
+    width: 100%;
+    height: clamp(310px, 44vw, 520px);
+    object-fit: cover;
+    object-position: left top;
+    border-radius: 26px 26px 0 0;
+}
+
+.apple-photo-section {
+    min-height: 720px;
+    color: #fff;
+    background:
+        linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.68)),
+        url("{% static 'images/background.png' %}");
+    background-size: cover;
+    background-position: center;
+}
+
+.apple-photo-section .apple-copy { padding-top: 64px; }
+.apple-photo-section .apple-title,
+.apple-photo-section .apple-subtitle { color: #fff; text-shadow: 0 14px 34px rgba(0,0,0,.25); }
+.apple-photo-section .apple-eyebrow { color: #d7f0b0; }
+.apple-photo-section .apple-link { color: #9fd5ff; }
+
+.apple-info-row {
+    position: absolute;
+    left: 50%;
+    bottom: 44px;
+    transform: translateX(-50%);
+    width: min(920px, calc(100vw - 40px));
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.apple-info {
+    min-height: 104px;
+    padding: 20px 18px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.22);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    text-align: left;
+}
+
+.apple-info b {
+    display: block;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.apple-info span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(255,255,255,.78);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.apple-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 0 12px 12px;
+    background: var(--apple-bg);
+}
+
+.apple-tile {
+    position: relative;
+    min-height: 580px;
+    overflow: hidden;
+    background: #fff;
+    text-align: center;
+}
+
+.apple-tile.dark { background: #0b1208; color: #fff; }
+.apple-tile.cream { background: #fbf6ea; }
+.apple-tile.green { background: #e8f2df; }
+
+.apple-tile-copy {
+    position: relative;
+    z-index: 2;
+    width: min(520px, calc(100% - 36px));
+    margin: 0 auto;
+    padding-top: 50px;
+}
+
+.apple-tile h2 {
+    margin: 0;
+    font-size: clamp(34px, 4.3vw, 52px);
+    line-height: 1.02;
+    font-weight: 800;
+    letter-spacing: -0.055em;
+}
+
+.apple-tile p {
+    margin: 10px auto 0;
+    max-width: 420px;
+    font-size: clamp(18px, 2.1vw, 22px);
+    line-height: 1.25;
+    font-weight: 450;
+    letter-spacing: -0.035em;
+}
+
+.apple-tile .apple-link { margin-top: 12px; font-size: 17px; }
+
+.tile-visual-chart {
+    width: min(520px, calc(100% - 44px));
+    height: 270px;
+    margin: 46px auto 0;
+    border-radius: 28px;
+    background:
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(255,255,255,.72)),
+        repeating-linear-gradient(0deg, transparent 0 43px, rgba(0,0,0,.06) 43px 44px);
+    box-shadow: 0 28px 60px rgba(0,0,0,.10);
+    padding: 28px;
+}
+
+.tile-chart-svg { width: 100%; height: 100%; display: block; }
+.tile-chart-svg .axis { stroke: rgba(0,0,0,.10); stroke-width: 1; }
+.tile-chart-svg .area { fill: rgba(45,106,47,.13); }
+.tile-chart-svg .line { fill: none; stroke: #2d6a2f; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.tile-chart-svg .dot { fill: #2d6a2f; }
+
+.tile-photo {
+    position: absolute;
+    inset: auto 0 0;
+    height: 360px;
+    background:
+        linear-gradient(180deg, transparent 0%, rgba(0,0,0,.42) 100%),
+        url("{% static 'images/background.png' %}");
+    background-size: cover;
+    background-position: center bottom;
+}
+
+.tile-report {
+    width: min(460px, calc(100% - 52px));
+    margin: 42px auto 0;
+    border-radius: 28px;
+    background: #fff;
+    box-shadow: 0 26px 60px rgba(31,53,21,.14);
+    padding: 26px;
+    text-align: left;
+}
+
+.tile-report-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    color: #1d1d1f;
+}
+
+.tile-report-row:last-child { border-bottom: 0; }
+.tile-report-row b { font-size: 15px; }
+.tile-report-row span { color: #6e6e73; font-size: 14px; }
+
+.apple-cta {
+    min-height: 520px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    text-align: center;
+    border-bottom: 0;
+}
+
+.apple-cta-inner { width: min(760px, calc(100vw - 40px)); }
+.apple-cta h2 {
+    margin: 0;
+    font-size: clamp(44px, 6vw, 72px);
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -0.06em;
+}
+.apple-cta p {
+    margin: 16px auto 0;
+    max-width: 560px;
+    color: var(--apple-muted);
+    font-size: clamp(20px, 2.6vw, 26px);
+    line-height: 1.22;
+    letter-spacing: -0.04em;
+}
+
+.apple-footer {
+    background: #f5f5f7;
+    color: #6e6e73;
+    border-top: 1px solid rgba(0,0,0,.08);
+}
+
+.apple-footer-inner {
+    width: min(980px, calc(100vw - 40px));
+    margin: 0 auto;
+    padding: 22px 0 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+}
+
+.apple-footer a { color: #424245; text-decoration: none; margin-left: 18px; }
+.apple-footer a:hover { text-decoration: underline; }
+
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity .7s ease, transform .7s ease;
+}
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 820px) {
+    .apple-links { display: none; }
+    .apple-nav-inner { width: calc(100vw - 28px); }
+    .apple-title { font-size: clamp(44px, 12vw, 64px); }
+    .apple-subtitle { font-size: 22px; }
+    .apple-actions { gap: 18px; }
+    .apple-link { font-size: 18px; }
+    .apple-grid { grid-template-columns: 1fr; }
+    .apple-info-row { position: relative; left: auto; bottom: auto; transform: none; grid-template-columns: 1fr; margin: 42px auto 0; }
+    .apple-photo-section { min-height: auto; padding-bottom: 48px; }
+}
+
+@media (max-width: 560px) {
+    .apple-nav-cta { display: none; }
+    .apple-section { min-height: 620px; }
+    .apple-copy { padding-top: 50px; }
+    .apple-actions { flex-direction: column; gap: 8px; }
+    .apple-device img { height: 360px; }
+    .apple-tile { min-height: 520px; }
+    .apple-footer-inner { display: block; }
+    .apple-footer nav { margin-top: 12px; }
+    .apple-footer a { margin: 0 14px 0 0; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="apple-home">
+    <header class="apple-nav">
+        <div class="apple-nav-inner">
+            <a href="{% url 'home' %}" class="apple-brand" aria-label="AgriPredict 홈">
+                <span class="apple-brand-mark"><i class="fas fa-seedling"></i></span>
+                <span>AgriPredict</span>
+            </a>
+            <nav class="apple-links" aria-label="주 메뉴">
+                <a href="{% url 'home' %}" class="active">홈</a>
+                <a href="/products/">예측 상품</a>
+                <a href="/news/">관련 뉴스</a>
+                <a href="{% url 'prediction_page' %}">대시보드</a>
+            </nav>
+            <a href="{% url 'prediction_page' %}" class="apple-nav-cta">시작하기</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="apple-section apple-hero">
+            <div class="apple-copy reveal">
+                <p class="apple-eyebrow">AgriPredict</p>
+                <h1 class="apple-title">농산물 가격을<br>더 쉽게.</h1>
+                <p class="apple-subtitle">실거래 데이터와 예측 모델로, 내일의 가격 흐름을 한눈에 확인하세요.</p>
+                <div class="apple-actions">
+                    <a href="{% url 'prediction_page' %}" class="apple-link">가격 예측 시작하기 <i class="fas fa-chevron-right"></i></a>
+                    <a href="/products/" class="apple-link">예측 상품 보기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+            <div class="apple-device reveal">
+                <img src="{% static 'images/dashboard-preview.png' %}" alt="AgriPredict 대시보드 미리보기">
+            </div>
+        </section>
+
+        <section class="apple-section apple-photo-section">
+            <div class="apple-copy reveal">
+                <p class="apple-eyebrow">Price Forecast</p>
+                <h2 class="apple-title">가격 변동을<br>미리 준비하세요.</h2>
+                <p class="apple-subtitle">작물, 단위, 등급을 선택하면 최근 가격과 예측 구간을 함께 보여줍니다.</p>
+                <div class="apple-actions">
+                    <a href="{% url 'prediction_page' %}" class="apple-link">대시보드 열기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+            <div class="apple-info-row reveal">
+                <div class="apple-info"><b>13</b><span>주요 작물 지원</span></div>
+                <div class="apple-info"><b>3일</b><span>단기 점예측 제공</span></div>
+                <div class="apple-info"><b>10일</b><span>P10-P90 구간 예측</span></div>
+            </div>
+        </section>
+
+        <section class="apple-grid" aria-label="주요 기능">
+            <article class="apple-tile cream reveal">
+                <div class="apple-tile-copy">
+                    <h2>흐름은 선명하게.</h2>
+                    <p>실제 가격과 예측 가격을 한 차트에서 비교합니다.</p>
+                    <a href="{% url 'prediction_page' %}" class="apple-link">자세히 보기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="tile-visual-chart" aria-hidden="true">
+                    <svg class="tile-chart-svg" viewBox="0 0 520 250" preserveAspectRatio="none">
+                        <line class="axis" x1="0" y1="60" x2="520" y2="60"/>
+                        <line class="axis" x1="0" y1="125" x2="520" y2="125"/>
+                        <line class="axis" x1="0" y1="190" x2="520" y2="190"/>
+                        <path class="area" d="M0,178 C70,142 118,164 175,120 C236,72 292,112 348,88 C424,54 460,72 520,42 L520,250 L0,250 Z"/>
+                        <path class="line" d="M0,178 C70,142 118,164 175,120 C236,72 292,112 348,88 C424,54 460,72 520,42"/>
+                        <circle class="dot" cx="520" cy="42" r="7"/>
+                    </svg>
+                </div>
+            </article>
+
+            <article class="apple-tile dark reveal">
+                <div class="apple-tile-copy">
+                    <h2>상품은 다양하게.</h2>
+                    <p>배추, 양배추, 사과, 양파 등 주요 품목을 선택할 수 있습니다.</p>
+                    <a href="/products/" class="apple-link">상품 보기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="tile-photo" aria-hidden="true"></div>
+            </article>
+
+            <article class="apple-tile green reveal">
+                <div class="apple-tile-copy">
+                    <h2>분석은 읽기 쉽게.</h2>
+                    <p>가격 방향, 변동 가능성, 주요 요인을 문장과 이미지로 정리합니다.</p>
+                    <a href="{% url 'prediction_page' %}" class="apple-link">결과 분석 보기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="tile-report" aria-hidden="true">
+                    <div class="tile-report-row"><b>가격 방향</b><span>상승 가능성</span></div>
+                    <div class="tile-report-row"><b>예측 구간</b><span>P10-P90</span></div>
+                    <div class="tile-report-row"><b>변동 요인</b><span>기상·경제 지표</span></div>
+                    <div class="tile-report-row"><b>리포트</b><span>PDF 생성</span></div>
+                </div>
+            </article>
+
+            <article class="apple-tile reveal">
+                <div class="apple-tile-copy">
+                    <h2>뉴스까지 함께.</h2>
+                    <p>시장 흐름을 파악할 수 있도록 관련 뉴스를 함께 확인합니다.</p>
+                    <a href="/news/" class="apple-link">뉴스 보기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="tile-visual-chart" aria-hidden="true">
+                    <svg class="tile-chart-svg" viewBox="0 0 520 250" preserveAspectRatio="none">
+                        <line class="axis" x1="0" y1="80" x2="520" y2="80"/>
+                        <line class="axis" x1="0" y1="160" x2="520" y2="160"/>
+                        <path class="area" d="M0,160 C76,108 132,114 194,98 C260,82 304,46 368,68 C430,90 468,62 520,56 L520,250 L0,250 Z"/>
+                        <path class="line" d="M0,160 C76,108 132,114 194,98 C260,82 304,46 368,68 C430,90 468,62 520,56"/>
+                        <circle class="dot" cx="520" cy="56" r="7"/>
+                    </svg>
+                </div>
+            </article>
+        </section>
+
+        <section class="apple-section apple-cta">
+            <div class="apple-cta-inner reveal">
+                <h2>지금 바로 시작하세요.</h2>
+                <p>품목을 고르고, 가격 흐름을 보고, 예측 결과를 확인하세요.</p>
+                <div class="apple-actions">
+                    <a href="{% url 'prediction_page' %}" class="apple-link">대시보드 열기 <i class="fas fa-chevron-right"></i></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="apple-footer">
+        <div class="apple-footer-inner">
+            <span>© 2026 AgriPredict. 농산물 가격 예측 서비스.</span>
+            <nav aria-label="하단 메뉴">
+                <a href="{% url 'home' %}">홈</a>
+                <a href="/products/">예측 상품</a>
+                <a href="/news/">관련 뉴스</a>
+                <a href="{% url 'prediction_page' %}">대시보드</a>
+            </nav>
+        </div>
+    </footer>
+</div>
+
+<script>
+(function () {
+    var items = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) {
+        items.forEach(function (el) { el.classList.add('in'); });
+        return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('in');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    items.forEach(function (el) { io.observe(el); });
+})();
+</script>
+{% endblock %}

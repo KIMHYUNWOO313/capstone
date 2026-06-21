@@ -1,0 +1,42 @@
+# ── 민감 정보 ────────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.key
+
+# ── 실험 보관용 (별도 보관) ───────────────────────────────────────────────────
+tmp/
+
+# ── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ── 가상환경 ────────────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── IDE / OS ────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── 로그 / 임시 출력물 ──────────────────────────────────────────────────────
+*.log
+04_XAI_EXPLAINER/outputs/dry_run/
+04_XAI_EXPLAINER/outputs/explanations_*.json
+
+# ── HuggingFace 캐시 (TimesFM 자동 다운로드분) ──────────────────────────────
+.cache/
+huggingface/

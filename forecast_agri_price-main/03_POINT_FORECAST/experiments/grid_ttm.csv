@@ -1,0 +1,4 @@
+name,model_path,revision,context_length,prediction_length,lr,epochs,batch_size,val_loss,elapsed_min
+r2_main_lr1e3_e8,ibm-granite/granite-timeseries-ttm-r2,main,512,96,0.001,8,32,0.27178889513015747,1.86
+r2_main_lr5e4_e12,ibm-granite/granite-timeseries-ttm-r2,main,512,96,0.0005,12,32,0.24629706144332886,2.22
+r2_main_lr2e3_e6,ibm-granite/granite-timeseries-ttm-r2,main,512,96,0.002,6,32,0.27424079179763794,1.82

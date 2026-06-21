@@ -1,0 +1,2200 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}User Prediction - Dashboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=agri-figma-65">
+{% if page == 'prediction' or page == 'report' %}
+<style>
+    .dashboard-main {
+        margin-left: 126px !important;
+        width: calc(100vw - 126px) !important;
+        max-width: none !important;
+        padding: 14px 18px 16px !important;
+    }
+    .page-content.agri-prediction-page {
+        width: 100% !important;
+        max-width: none !important;
+        margin: 0 !important;
+        align-self: stretch !important;
+    }
+    .agri-prediction-page > .agri-card,
+    .agri-prediction-page > .metric-grid,
+    .agri-prediction-page > .agri-hero,
+    .agri-prediction-page > .agri-hero-badges {
+        width: 100% !important;
+        max-width: none !important;
+    }
+    .metric-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+    @media (max-width: 768px) {
+        .dashboard-main {
+            margin-left: 70px !important;
+            width: calc(100vw - 76px) !important;
+            padding: 18px 14px 32px !important;
+        }
+        .metric-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endif %}
+{% endblock %}
+{% block theme_toggle %}{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="sidebar">
+        <a href="{% url 'home' %}" class="sidebar-brand">
+            <span class="brand-icon"><i class="fas fa-seedling"></i></span>
+            <span class="brand-copy">
+                <span class="brand-text">AgriPredict</span>
+                <span class="brand-subtitle">AI Forecasting</span>
+            </span>
+        </a>
+        <nav class="sidebar-nav">
+            <a href="{% url 'prediction_page' %}" class="nav-link {% if page == 'prediction' %}active{% endif %}">
+                <i class="fas fa-th-large"></i>
+                <span>대시보드</span>
+            </a>
+            <a href="{% url 'report_page' %}" class="nav-link {% if page == 'report' %}active{% endif %}">
+                <i class="fas fa-file-lines"></i>
+                <span>리포트</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer"></div>
+    </aside>
+
+    <main class="dashboard-main">
+        {% if page == 'overview' %}
+        <div class="page-content">
+            <div class="welcome-card">
+                <div class="welcome-badge"><i class="fas fa-seedling"></i> AgriPredict</div>
+                <h1>농산물 가격 예측을 시작하세요</h1>
+                <p>점예측(3일)과 구간 예측(10일) 기반으로 주요 농산물 가격 흐름을 확인하고, 저장된 예측과 실제가 정산 결과를 한 곳에서 볼 수 있습니다.</p>
+                <div class="quick-stats">
+                    <div class="stat">
+                        <span class="stat-value">6</span>
+                        <span class="stat-label">Supported Crops</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">2</span>
+                        <span class="stat-label">Forecast Models</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% elif page == 'prediction' %}
+        <div class="page-content agri-prediction-page agri-figma">
+            {% csrf_token %}
+            <div class="agri-hero">
+                <div class="agri-hero-text">
+                    <h1 class="page-title">농산물 가격 예측 대시보드</h1>
+                    <p class="page-subtitle">시간단위 AI 예측으로 더 정확한 가격 인사이트를 제공합니다.</p>
+                </div>
+                <div class="dashboard-actions">
+                    <div class="freshness-card">
+                        <span class="freshness-dot"></span>
+                        <span>
+                            <strong>데이터 최신</strong>
+                            <small id="data-updated-at">불러오는 중...</small>
+                        </span>
+                    </div>
+                    <button id="theme-toggle" class="top-icon-btn" aria-label="Toggle theme">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="figma-dashboard-shell">
+                <div class="figma-main-pane">
+                    <section class="agri-card figma-control-card figma-control-card--row">
+                        <div class="figma-control-row">
+                            <input type="hidden" id="agri-item-select">
+                            <label class="field-group">
+                                <span>작물</span>
+                                <select id="agri-crop-select" class="field-input"></select>
+                            </label>
+                            <label class="field-group">
+                                <span>단위명</span>
+                                <select id="agri-unit-select" class="field-input"></select>
+                            </label>
+                            <label class="field-group">
+                                <span>등급명</span>
+                                <select id="agri-grade-select" class="field-input"></select>
+                            </label>
+                            <label class="field-group">
+                                <span>기간</span>
+                                <input type="text" class="field-input" id="agri-period-display" value="2026.02.15 ~ 2026.05.16" readonly>
+                            </label>
+                            <div class="figma-control-actions">
+                                <button type="button" id="agri-force-forecast" class="btn-submit figma-run-btn">
+                                    예측 불러오기 <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button type="button" id="agri-run-forecast" class="btn-outline">새 예측 실행</button>
+                                <button type="button" id="agri-explain" class="btn-outline">결과 분석</button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="agri-card figma-chart-card">
+                        <div class="figma-chart-head">
+                            <h3>가격 추이 (실제 vs 예측) <span class="chart-legend"><em class="legend-dot legend-actual"></em>실제 가격 <em class="legend-dot legend-predict"></em>구간 예측(10일) 범위 (P10~P90) <em class="legend-dot legend-timesfm"></em>점예측(3일)</span></h3>
+                            <div class="chart-range-toggle" role="tablist">
+                                <button type="button" data-range="30" class="active">30일</button>
+                            </div>
+                        </div>
+                        <div class="figma-chart-body">
+                            <div class="agri-chart-wrap">
+                                <canvas id="agri-chart"></canvas>
+                            </div>
+                            <aside class="chart-current-card" aria-label="현재 가격 요약">
+                                <div class="hero-price-head">
+                                    <span>현재 가격 (실측)</span>
+                                    <em id="hero-item-label">배추 · cabbage_10_net_high</em>
+                                </div>
+                                <strong id="metric-current" class="hero-price-value">- 원</strong>
+                                <small class="hero-price-foot">
+                                    전일 대비
+                                    <b id="hero-day-change">- 원 (-%)</b>
+                                </small>
+                                <small class="hero-price-foot subtle">10일 평균 <b id="hero-avg-pred">- 원</b></small>
+                            </aside>
+                        </div>
+                    </section>
+
+                    <section class="agri-card figma-analysis-card">
+                        <div class="analysis-card-head">
+                            <span class="analysis-card-eyebrow">AI Forecast Analysis</span>
+                            <h3>결과 분석</h3>
+                        </div>
+                        <div id="agri-inline-analysis-text" class="analysis-card-body">
+                            <div class="analysis-empty-state">결과 분석을 누르면 요약, 표, 다이어그램, 차트형 카드로 정리됩니다.</div>
+                        </div>
+                    </section>
+
+                </div>
+
+                <aside class="figma-right-rail">
+                    <article class="agri-card analysis-image-rail-card">
+                        <div class="agri-table-head">
+                            <h3>결과분석 이미지</h3>
+                        </div>
+                        <div id="agri-analysis-image-rail" class="analysis-image-rail-empty">
+                            결과 분석을 누르면 AI가 생성한 인포그래픽 이미지가 여기에 표시됩니다.
+                        </div>
+                    </article>
+                </aside>
+            </div>
+            <div id="analysis-image-lightbox" class="analysis-image-lightbox" aria-hidden="true">
+                <button type="button" class="analysis-image-lightbox__backdrop" aria-label="확대 이미지 닫기"></button>
+                <div class="analysis-image-lightbox__panel" role="dialog" aria-modal="true" aria-label="결과분석 이미지 확대 보기">
+                    <button type="button" id="analysis-image-lightbox-close" class="analysis-image-lightbox__close" aria-label="닫기">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <img id="analysis-image-lightbox-img" alt="확대된 결과분석 인포그래픽">
+                </div>
+            </div>
+        </div>
+
+        {% elif page == 'report' %}
+        <div class="page-content agri-report-page agri-figma">
+            {% csrf_token %}
+            <div class="agri-hero report-hero">
+                <div class="agri-hero-text">
+                    <h1 class="page-title">AI 가격 예측 리포트</h1>
+                    <p class="page-subtitle">구간 예측(10일) · 점예측(3일)과 GPT 분석을 보고서 형식으로 정리합니다.</p>
+                </div>
+                <div class="dashboard-actions">
+                    <button id="report-generate-btn" class="btn-submit figma-run-btn" type="button">
+                        리포트 작성 <i class="fas fa-wand-magic-sparkles"></i>
+                    </button>
+                    <button id="report-download-btn" class="btn-outline report-download-btn" type="button">
+                        PDF 다운로드
+                    </button>
+                </div>
+            </div>
+
+            <section class="agri-card figma-control-card report-control-card">
+                <div class="figma-control-row report-control-row">
+                    <input type="hidden" id="report-item-select">
+                    <label class="field-group">
+                        <span>작물</span>
+                        <select id="report-crop-select" class="field-input"></select>
+                    </label>
+                    <label class="field-group">
+                        <span>단위명</span>
+                        <select id="report-unit-select" class="field-input"></select>
+                    </label>
+                    <label class="field-group">
+                        <span>등급명</span>
+                        <select id="report-grade-select" class="field-input"></select>
+                    </label>
+                    <label class="field-group">
+                        <span>리포트 기준</span>
+                        <input id="report-period-display" class="field-input" type="text" value="예측 데이터를 불러오는 중..." readonly>
+                    </label>
+                </div>
+            </section>
+
+            <section class="report-viewer-shell">
+                <article id="report-document" class="report-document">
+                    <header class="report-cover">
+                        <span class="report-kicker">AGRICULTURAL PRICE FORECAST REPORT</span>
+                        <h2 id="report-title">농산물 가격 예측 분석 리포트</h2>
+                        <p id="report-subtitle">품목을 선택하면 GPT 분석과 가격 예측 그래프가 포함된 리포트가 작성됩니다.</p>
+                        <div class="report-meta-grid">
+                            <div><span>품목</span><strong id="report-meta-item">-</strong></div>
+                            <div><span>모델</span><strong>구간 예측(10일) + 점예측(3일)</strong></div>
+                            <div><span>작성 시각</span><strong id="report-meta-time">-</strong></div>
+                        </div>
+                    </header>
+
+                    <section class="report-section">
+                        <div class="report-section-head">
+                            <span>01</span>
+                            <h3>가격 예측 그래프</h3>
+                        </div>
+                        <div class="report-chart-box">
+                            <canvas id="report-chart"></canvas>
+                        </div>
+                    </section>
+
+                    <section class="report-section">
+                        <div class="report-section-head">
+                            <span>02</span>
+                            <h3>GPT 결과 분석</h3>
+                        </div>
+                        <div id="report-analysis" class="report-analysis-box">
+                            리포트 작성 버튼을 누르면 예측 결과 기반 상세 분석이 표시됩니다.
+                        </div>
+                    </section>
+
+                    <section class="report-section report-summary-section">
+                        <div class="report-section-head">
+                            <span>03</span>
+                            <h3>예측 요약</h3>
+                        </div>
+                        <div class="report-summary-grid">
+                            <div><span>최근 실측가</span><strong id="report-current-price">-</strong></div>
+                            <div><span>점예측(3일)</span><strong id="report-timesfm-price">-</strong></div>
+                            <div><span>구간 예측(10일) 범위</span><strong id="report-chronos-range">-</strong></div>
+                        </div>
+                    </section>
+                </article>
+            </section>
+        </div>
+
+        {% elif page == 'aws' %}
+        <div class="page-content">
+            <h1 class="page-title">AWS Instances</h1>
+            <p class="page-subtitle">인스턴스 타입과 수량을 추가하고 자동 확장 추천을 확인합니다.</p>
+            <form method="post" action="{% url 'add_instance' %}" class="content-form">
+                {% csrf_token %}
+                <div class="field-group">
+                    <label>Instance Type</label>
+                    <select name="instance_type" required>
+                        <option value="">Select</option>
+                        <optgroup label="T2">
+                            <option value="t2.micro">t2.micro · 1 vCPU, 1GB</option>
+                            <option value="t2.small">t2.small · 1 vCPU, 2GB</option>
+                            <option value="t2.medium">t2.medium · 2 vCPU, 4GB</option>
+                            <option value="t2.large">t2.large · 2 vCPU, 8GB</option>
+                            <option value="t2.xlarge">t2.xlarge · 4 vCPU, 16GB</option>
+                            <option value="t2.2xlarge">t2.2xlarge · 8 vCPU, 32GB</option>
+                        </optgroup>
+                        <optgroup label="T3">
+                            <option value="t3.micro">t3.micro · 2 vCPU, 1GB</option>
+                            <option value="t3.small">t3.small · 2 vCPU, 2GB</option>
+                            <option value="t3.medium">t3.medium · 2 vCPU, 4GB</option>
+                            <option value="t3.large">t3.large · 2 vCPU, 8GB</option>
+                            <option value="t3.xlarge">t3.xlarge · 4 vCPU, 16GB</option>
+                            <option value="t3.2xlarge">t3.2xlarge · 8 vCPU, 32GB</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <label>Count</label>
+                        <input type="number" name="count" value="1" min="1" max="100">
+                    </div>
+                    <div class="field-group flex-1">
+                        <label>Description</label>
+                        <input type="text" name="description" placeholder="Optional">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-plus"></i> Add Instance
+                </button>
+            </form>
+            <div class="content-list">
+                <h4>Your Instances</h4>
+                {% for inst in instances %}
+                <div class="list-item instance-row">
+                    <span class="tag">{{ inst.instance_type }}</span>
+                    <span class="muted">× {{ inst.count }}</span>
+                    {% if inst.description %}<span class="desc">{{ inst.description }}</span>{% endif %}
+                </div>
+                {% empty %}
+                <p class="empty">No instances yet.</p>
+                {% endfor %}
+            </div>
+            <div class="scaling-section">
+                <button type="button" id="scaling-btn" class="btn-outline btn-full">
+                    <i class="fas fa-expand-arrows-alt"></i> Scaling Recommendation
+                </button>
+                <div id="scaling-result" class="result-box hidden">
+                    <span id="scaling-recommendation" class="badge"></span>
+                    <p id="scaling-message" class="result-msg"></p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if page == 'prediction' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    function getCookie(name) {
+        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? decodeURIComponent(v[2]) : '';
+    }
+    const csrftoken = getCookie('csrftoken');
+    let agriChart = null;
+    let lastPayload = null;
+    let lastExplanation = '';
+    let lastExplanationPlain = '';
+    const FORECAST_MODELS = ['probabilistic', 'point'];
+
+    function esc(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    }
+
+    function themeColors() {
+        const styles = getComputedStyle(document.documentElement);
+        const text = styles.getPropertyValue('--text-secondary').trim() || '#64748b';
+        const muted = styles.getPropertyValue('--text-muted').trim() || '#94a3b8';
+        const grid = styles.getPropertyValue('--border').trim() || 'rgba(15,23,42,0.08)';
+        return { text, muted, grid };
+    }
+
+    let agriItemRows = [];
+
+    function uniqueValues(rows, key) {
+        return [...new Set((rows || []).map(row => row[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'ko'));
+    }
+
+    function fillOptions(select, values) {
+        if (!select) return;
+        select.innerHTML = values.map(value => '<option value="' + esc(value) + '">' + esc(value) + '</option>').join('');
+    }
+
+    function syncItemSelectFromParts(prefix, rows, preferredId) {
+        const hidden = document.getElementById(prefix + '-item-select');
+        const cropSel = document.getElementById(prefix + '-crop-select');
+        const unitSel = document.getElementById(prefix + '-unit-select');
+        const gradeSel = document.getElementById(prefix + '-grade-select');
+        if (!hidden || !cropSel || !unitSel || !gradeSel) return null;
+
+        const currentUnit = unitSel.value;
+        const currentGrade = gradeSel.value;
+        const cropRows = rows.filter(row => row.crop === cropSel.value);
+        fillOptions(unitSel, uniqueValues(cropRows, 'unit'));
+        unitSel.value = cropRows.some(row => row.unit === currentUnit) ? currentUnit : (unitSel.options[0]?.value || '');
+
+        const unitRows = cropRows.filter(row => row.unit === unitSel.value);
+        fillOptions(gradeSel, uniqueValues(unitRows, 'grade'));
+        gradeSel.value = unitRows.some(row => row.grade === currentGrade) ? currentGrade : (gradeSel.options[0]?.value || '');
+
+        const matched = unitRows.find(row => row.grade === gradeSel.value) || unitRows[0] || cropRows[0] || rows[0];
+        if (matched) hidden.value = matched.id;
+        return matched || null;
+    }
+
+    function setupSplitItemSelectors(prefix, rows, preferredId, onChange) {
+        const hidden = document.getElementById(prefix + '-item-select');
+        const cropSel = document.getElementById(prefix + '-crop-select');
+        const unitSel = document.getElementById(prefix + '-unit-select');
+        const gradeSel = document.getElementById(prefix + '-grade-select');
+        if (!hidden || !cropSel || !unitSel || !gradeSel) return null;
+
+        const preferred = rows.find(row => row.id === preferredId) || rows.find(row => row.crop === '배추') || rows[0];
+        fillOptions(cropSel, uniqueValues(rows, 'crop'));
+        cropSel.value = preferred?.crop || cropSel.options[0]?.value || '';
+        fillOptions(unitSel, uniqueValues(rows.filter(row => row.crop === cropSel.value), 'unit'));
+        unitSel.value = preferred?.unit || unitSel.options[0]?.value || '';
+        fillOptions(gradeSel, uniqueValues(rows.filter(row => row.crop === cropSel.value && row.unit === unitSel.value), 'grade'));
+        gradeSel.value = preferred?.grade || gradeSel.options[0]?.value || '';
+        syncItemSelectFromParts(prefix, rows, preferred?.id);
+
+        cropSel.onchange = () => { syncItemSelectFromParts(prefix, rows); if (onChange) onChange(); };
+        unitSel.onchange = () => { syncItemSelectFromParts(prefix, rows); if (onChange) onChange(); };
+        gradeSel.onchange = () => { syncItemSelectFromParts(prefix, rows); if (onChange) onChange(); };
+        return preferred || null;
+    }
+
+    function selectedAgriItemMeta() {
+        const itemId = document.getElementById('agri-item-select')?.value || '';
+        return agriItemRows.find(row => row.id === itemId) || null;
+    }
+
+    function updateForecastControls() {
+        const meta = selectedAgriItemMeta();
+        const supported = !meta || meta.forecast_supported !== false;
+        ['agri-force-forecast', 'agri-run-forecast', 'agri-reconcile', 'agri-explain'].forEach(function(id) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            btn.disabled = !supported;
+            btn.title = supported ? '' : '이 품목/단위/등급 조합은 현재 AWS 예측 모델에 연결되어 있지 않아 실제가만 표시됩니다.';
+        });
+        return supported;
+    }
+
+    async function handleAgriItemChanged() {
+        const supported = updateForecastControls();
+        if (supported) {
+            await loadCachedPrediction(null);
+        } else {
+            await loadActualOnly(false);
+        }
+    }
+
+    async function loadItems() {
+        const hidden = document.getElementById('agri-item-select');
+        const res = await fetch('/api/agri/items/');
+        const data = await res.json();
+        if (!data.ok) { return; }
+        const rows = data.items || [];
+        agriItemRows = rows;
+        if (!rows.length) {
+            if (hidden) hidden.value = '';
+            return;
+        }
+        const prefer = rows.find(row => row.id && row.id.indexOf('cabbage_') === 0)?.id;
+        setupSplitItemSelectors('agri', rows, prefer, handleAgriItemChanged);
+        updateForecastControls();
+    }
+
+    function buildChartData(points) {
+        const labels = Array.from(new Set((points || []).map(p => p.date))).sort();
+        const actualMap = new Map();
+        const chronosMap = new Map();
+        const timesfmMap = new Map();
+        const lowMap = new Map();
+        const highMap = new Map();
+
+        (points || []).forEach(function (p) {
+            if (!p.date) return;
+            if (p.kind === 'actual') {
+                actualMap.set(p.date, p.value);
+                return;
+            }
+            if (p.kind !== 'predict') return;
+            const modelName = p.forecast_model || p.model_name || 'chronos2';
+            if (modelName === 'timesfm') {
+                timesfmMap.set(p.date, p.value);
+                return;
+            }
+            chronosMap.set(p.date, p.value);
+            const lo = Number(p.p10 ?? p.p1);
+            const hi = Number(p.p90 ?? p.p99);
+            lowMap.set(p.date, Number.isFinite(lo) ? lo : null);
+            highMap.set(p.date, Number.isFinite(hi) ? hi : null);
+        });
+
+        const actual = labels.map(d => actualMap.has(d) ? actualMap.get(d) : null);
+        const chronos = labels.map(d => chronosMap.has(d) ? chronosMap.get(d) : null);
+        const timesfm = labels.map(d => timesfmMap.has(d) ? timesfmMap.get(d) : null);
+        const predictLow = labels.map(d => lowMap.has(d) ? lowMap.get(d) : null);
+        const predictHigh = labels.map(d => highMap.has(d) ? highMap.get(d) : null);
+
+        const lastActualIdx = actual.reduce(function (acc, v, i) {
+            return v !== null && v !== undefined ? i : acc;
+        }, -1);
+        if (lastActualIdx >= 0 && actual[lastActualIdx] !== null) {
+            const firstChronosIdx = chronos.findIndex(v => v !== null && v !== undefined);
+            const firstTimesfmIdx = timesfm.findIndex(v => v !== null && v !== undefined);
+            if (firstChronosIdx > lastActualIdx) chronos[lastActualIdx] = actual[lastActualIdx];
+            if (firstTimesfmIdx > lastActualIdx) timesfm[lastActualIdx] = actual[lastActualIdx];
+        }
+        return { labels, actual, chronos, timesfm, predictLow, predictHigh };
+    }
+
+    function fmtCell(value) {
+        if (value === null || value === undefined || value === '') return '-';
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(value);
+        }
+        const n = Number(value);
+        if (Number.isFinite(n) && String(value).trim() !== '') {
+            return new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(n);
+        }
+        return esc(value);
+    }
+
+    function fmtTableCell(value) {
+        if (value === null || value === undefined || value === '') return '-';
+        const n = Number(value);
+        if (Number.isFinite(n) && String(value).trim() !== '') {
+            return String(Math.round(n));
+        }
+        return esc(value);
+    }
+
+    function renderVerticalTableRows(verticalRows) {
+        const grouped = [];
+        verticalRows.forEach(row => {
+            const last = grouped[grouped.length - 1];
+            if (last && last.date === row.date) {
+                last.rows.push(row);
+            } else {
+                grouped.push({ date: row.date, rows: [row] });
+            }
+        });
+
+        return grouped.map(group => {
+            return group.rows.map((row, idx) => {
+                const dateCell = idx === 0
+                    ? '<td class="date-merged-cell" rowspan="' + group.rows.length + '">' + esc(group.date) + '</td>'
+                    : '';
+                return '<tr>' + dateCell + '<td class="metric-cell">' + esc(row.metric) + '</td><td class="value-cell">' + fmtTableCell(row.value) + '</td></tr>';
+            }).join('');
+        }).join('');
+    }
+
+    function renderForecastTable(table) {
+        const panel = document.getElementById('agri-table-panel');
+        const titleEl = document.getElementById('agri-table-title');
+        const countEl = document.getElementById('agri-table-count');
+        const thead = document.getElementById('agri-table-thead');
+        const tbody = document.getElementById('agri-table-tbody');
+        const empty = document.getElementById('agri-table-empty');
+        if (!thead || !tbody) return;
+        if (panel) panel.classList.remove('hidden');
+
+        const rows = (table && table.rows) || [];
+        const columns = (table && table.columns) || [];
+        if (titleEl) titleEl.textContent = (table && table.title) || '예측 결과';
+        if (countEl) countEl.textContent = rows.length + ' rows';
+
+        if (!rows.length || !columns.length) {
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
+            return;
+        }
+
+        if (table && table.orientation === 'wide') {
+            const dateColumns = columns.slice(1);
+            const verticalRows = dateColumns.flatMap(dateColumn => {
+                return rows.map(row => ({
+                    date: dateColumn,
+                    metric: row.label || row.metric || '-',
+                    value: row[dateColumn],
+                }));
+            });
+            thead.innerHTML = '<tr><th>날짜</th><th>구분</th><th>가격</th></tr>';
+            tbody.innerHTML = renderVerticalTableRows(verticalRows);
+            if (countEl) countEl.textContent = verticalRows.length + ' rows';
+        } else {
+            const keyMap = {
+                ITEM_ID: 'item_id',
+                DATE: 'date',
+                STEP: 'step',
+                Y_PRED: 'y_pred',
+                MEAN: 'mean',
+                P10: 'p10',
+                P20: 'p20',
+                P50: 'p50',
+                P80: 'p80',
+                P90: 'p90',
+            };
+            const valueColumns = columns.filter(c => !['ITEM_ID', 'DATE', 'STEP'].includes(c));
+            const verticalRows = rows.flatMap(row => {
+                const dateLabel = row.date || row.DATE || row.label || '-';
+                return valueColumns.map(column => {
+                    const key = keyMap[column] || column.toLowerCase();
+                    return { date: dateLabel, metric: column, value: row[key] };
+                });
+            });
+            thead.innerHTML = '<tr><th>날짜</th><th>구분</th><th>가격</th></tr>';
+            tbody.innerHTML = renderVerticalTableRows(verticalRows);
+            if (countEl) countEl.textContent = verticalRows.length + ' rows';
+        }
+        if (empty) empty.classList.add('hidden');
+    }
+
+    function fmtWon(value) {
+        if (value === null || value === undefined || Number.isNaN(value)) return '- 원';
+        return new Intl.NumberFormat('ko-KR').format(Math.round(value)) + ' 원';
+    }
+
+    function metricNumber(value) {
+        if (value === null || value === undefined || value === '') return null;
+        const n = Number(value);
+        return Number.isFinite(n) ? n : null;
+    }
+
+    function formatUpdatedAt(value, fallbackDate) {
+        if (value) {
+            const d = new Date(value);
+            if (!Number.isNaN(d.getTime())) {
+                const parts = new Intl.DateTimeFormat('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                }).formatToParts(d).reduce((acc, p) => {
+                    acc[p.type] = p.value;
+                    return acc;
+                }, {});
+                return parts.year + '.' + parts.month + '.' + parts.day + ' ' + parts.hour + ':' + parts.minute + ' 기준';
+            }
+        }
+        if (fallbackDate) {
+            return String(fallbackDate).replace(/-/g, '.') + ' 기준';
+        }
+        return '기준 시각 없음';
+    }
+
+    function updateFreshness(chartPayload) {
+        const el = document.getElementById('data-updated-at');
+        if (!el) return;
+        el.textContent = formatUpdatedAt(chartPayload.data_updated_at, chartPayload.last_csv_date);
+    }
+
+    function updateMetrics(points, metrics) {
+        if (metrics) {
+            const currentEl = document.getElementById('metric-current');
+            const predictEl = document.getElementById('metric-predict');
+            const volatilityEl = document.getElementById('metric-volatility');
+            const confidenceEl = document.getElementById('metric-confidence');
+            if (currentEl) currentEl.textContent = fmtWon(metricNumber(metrics.current_actual_krw));
+            if (predictEl) predictEl.textContent = fmtWon(metricNumber(metrics.prediction_average_krw));
+            if (volatilityEl) {
+                const v = metricNumber(metrics.volatility_pct);
+                volatilityEl.textContent = v !== null ? v.toFixed(1) + '%' : '- %';
+            }
+            if (confidenceEl) {
+                const c = metricNumber(metrics.confidence_pct);
+                confidenceEl.textContent = c !== null ? c.toFixed(1) + '%' : '- %';
+                const ring = document.getElementById('metric-confidence-ring');
+                const tag = document.getElementById('confidence-tag');
+                if (tag) tag.textContent = c !== null ? c.toFixed(1) + '%' : '- %';
+                if (ring) {
+                    const safe = c !== null ? Math.max(0, Math.min(100, c)) : 0;
+                    ring.style.strokeDashoffset = String(289 - (289 * safe / 100));
+                }
+                const summary = document.getElementById('confidence-summary');
+                if (summary && c !== null) {
+                    summary.textContent = c >= 70
+                        ? '예측 구간과 최근 가격 흐름이 안정적으로 맞물려 있습니다.'
+                        : '변동성이 높아 예측 구간을 함께 확인하는 것이 좋습니다.';
+                }
+            }
+            return;
+        }
+
+        const actualValues = (points || []).filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value))).map(p => Number(p.value));
+        const predictValues = (points || []).filter(p => p.kind === 'predict' && Number.isFinite(Number(p.value))).map(p => Number(p.value));
+        const latestActual = actualValues.length ? actualValues[actualValues.length - 1] : null;
+        const avgPredict = predictValues.length ? predictValues.reduce((a, b) => a + b, 0) / predictValues.length : null;
+        const recent = actualValues.slice(-10);
+        const mean = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
+        const variance = recent.length && mean ? recent.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / recent.length : null;
+        const volatility = variance && mean ? Math.sqrt(variance) / mean * 100 : null;
+
+        const currentEl = document.getElementById('metric-current');
+        const predictEl = document.getElementById('metric-predict');
+        const volatilityEl = document.getElementById('metric-volatility');
+        const confidenceEl = document.getElementById('metric-confidence');
+        if (currentEl) currentEl.textContent = fmtWon(latestActual);
+        if (predictEl) predictEl.textContent = predictValues.length ? fmtWon(avgPredict) : '- 원';
+        if (volatilityEl) volatilityEl.textContent = volatility === null ? '- %' : volatility.toFixed(1) + '%';
+        const fallbackConfidence = volatility === null ? null : Math.max(40, Math.min(95, 100 - volatility * 1.6));
+        if (confidenceEl) confidenceEl.textContent = fallbackConfidence === null ? '- %' : Math.round(fallbackConfidence) + '%';
+        const ring = document.getElementById('metric-confidence-ring');
+        if (ring) {
+            const safe = fallbackConfidence === null ? 0 : Math.max(0, Math.min(100, fallbackConfidence));
+            ring.style.strokeDashoffset = String(289 - (289 * safe / 100));
+        }
+    }
+
+    function classifyRisk(score) {
+        if (score >= 70) return { cls: 'high', label: '높음' };
+        if (score >= 40) return { cls: 'mid', label: '중간' };
+        return { cls: 'low', label: '낮음' };
+    }
+
+    function makeRiskItem(text, score) {
+        const level = classifyRisk(score);
+        return '<li><span class="risk-dot ' + level.cls + '"></span>'
+            + esc(text)
+            + ' <em class="risk-tag risk-' + level.cls + '">' + level.label + '</em></li>';
+    }
+
+    function updateRiskFactors(chartPayload) {
+        const listEl = document.getElementById('agri-risk-list');
+        if (!listEl || !chartPayload) return;
+        const pts = chartPayload.points || [];
+        const actuals = pts.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const predicts = pts.filter(p => p.kind === 'predict' && Number.isFinite(Number(p.value)));
+
+        if (!actuals.length && !predicts.length) {
+            listEl.innerHTML = '<li>리스크 계산에 필요한 데이터가 부족합니다.</li>';
+            return;
+        }
+
+        const metrics = chartPayload.metrics || {};
+        const volatility = Number(metrics.volatility_pct);
+        const safeVol = Number.isFinite(volatility) ? volatility : 0;
+        const volScore = Math.max(0, Math.min(100, safeVol * 8.5));
+
+        let widthScore = 20;
+        let avgWidthPct = null;
+        if (predicts.length) {
+            const widths = predicts
+                .map(p => {
+                    const lo = Number(p.p1 ?? p.p10);
+                    const hi = Number(p.p99 ?? p.p90);
+                    const mid = Number(p.value);
+                    if (!Number.isFinite(lo) || !Number.isFinite(hi) || !Number.isFinite(mid) || mid === 0) return null;
+                    return ((hi - lo) / Math.abs(mid)) * 100;
+                })
+                .filter(v => Number.isFinite(v));
+            if (widths.length) {
+                avgWidthPct = widths.reduce((a, b) => a + b, 0) / widths.length;
+                widthScore = Math.max(0, Math.min(100, avgWidthPct * 3.0));
+            }
+        }
+
+        let trendScore = 15;
+        let trendShiftPct = null;
+        if (actuals.length >= 5 && predicts.length >= 2) {
+            const recentActual = actuals.slice(-7).map(p => Number(p.value));
+            const nearPredict = predicts.slice(0, 3).map(p => Number(p.value));
+            const aAvg = recentActual.reduce((a, b) => a + b, 0) / recentActual.length;
+            const pAvg = nearPredict.reduce((a, b) => a + b, 0) / nearPredict.length;
+            if (aAvg !== 0) {
+                trendShiftPct = ((pAvg - aAvg) / Math.abs(aAvg)) * 100;
+                trendScore = Math.max(0, Math.min(100, Math.abs(trendShiftPct) * 7.0));
+            }
+        }
+
+        const rows = [];
+        rows.push(makeRiskItem(
+            '최근 변동성(CV) ' + safeVol.toFixed(1) + '%로 단기 가격 출렁임 위험',
+            volScore
+        ));
+        rows.push(makeRiskItem(
+            avgWidthPct === null
+                ? '예측 구간 폭 데이터가 제한적이어서 불확실성 판단 보수적 적용'
+                : '예측 구간 평균 폭 ' + avgWidthPct.toFixed(1) + '%로 미래 불확실성 반영',
+            widthScore
+        ));
+        rows.push(makeRiskItem(
+            trendShiftPct === null
+                ? '실측 대비 예측 추세 전환 위험(데이터 부족으로 제한 계산)'
+                : '실측 최근값 대비 단기 예측 편차 ' + trendShiftPct.toFixed(1) + '%로 추세 전환 가능성',
+            trendScore
+        ));
+
+        listEl.innerHTML = rows.join('');
+    }
+
+    function updateHeroMeta(chartPayload) {
+        const pts = chartPayload.points || [];
+        const actuals = pts.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const predicts = pts.filter(p => p.kind === 'predict' && Number.isFinite(Number(p.value)));
+
+        const labelEl = document.getElementById('hero-item-label');
+        if (labelEl) {
+            const sel = document.getElementById('agri-item-select');
+            const label = (chartPayload.item_label || (sel && sel.options[sel.selectedIndex]?.textContent) || '').trim();
+            const cropKo = chartPayload.crop_ko || '';
+            labelEl.textContent = (cropKo && label) ? `${cropKo} · ${label}` : (label || '품목');
+        }
+
+        const dayEl = document.getElementById('hero-day-change');
+        if (dayEl && actuals.length >= 2) {
+            const last = Number(actuals[actuals.length - 1].value);
+            const prev = Number(actuals[actuals.length - 2].value);
+            const diff = last - prev;
+            const pct = prev ? (diff / prev) * 100 : 0;
+            const sign = diff > 0 ? '+' : (diff < 0 ? '' : '');
+            dayEl.textContent = `${sign}${new Intl.NumberFormat('ko-KR').format(Math.round(diff))} 원 (${sign}${pct.toFixed(2)}%)`;
+            dayEl.style.color = diff >= 0 ? '#d6e887' : '#f1a3a3';
+        } else if (dayEl) {
+            dayEl.textContent = '- 원 (-%)';
+        }
+
+        const avgEl = document.getElementById('hero-avg-pred');
+        if (avgEl) {
+            const recent = (predicts.length ? predicts : actuals).slice(-10).map(p => Number(p.value));
+            const avg = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : null;
+            avgEl.textContent = avg !== null ? `${new Intl.NumberFormat('ko-KR').format(Math.round(avg))} 원` : '- 원';
+        }
+
+        const periodEl = document.getElementById('hero-period');
+        if (periodEl && actuals.length) {
+            const first = String(actuals[0].date || '').replace(/-/g, '.');
+            const last = String(actuals[actuals.length - 1].date || '').replace(/-/g, '.');
+            if (first && last) periodEl.textContent = `${first} ~ ${last}`;
+        }
+
+        const modelEl = document.getElementById('hero-model');
+        if (modelEl) modelEl.textContent = '구간 예측(10일) + 점예측(3일)';
+
+        const updatedEl = document.getElementById('hero-updated');
+        if (updatedEl) {
+            const now = new Date();
+            updatedEl.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        }
+    }
+
+    let chartRangeDays = 30;
+    function parseIsoDate(value) {
+        if (!value) return null;
+        const parts = String(value).split('-').map(v => parseInt(v, 10));
+        if (parts.length !== 3 || parts.some(v => !Number.isFinite(v))) return null;
+        const [year, month, day] = parts;
+        return new Date(year, month - 1, day);
+    }
+
+    function formatDotDate(dateObj) {
+        if (!(dateObj instanceof Date) || Number.isNaN(dateObj.getTime())) return '';
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        return `${y}.${m}.${d}`;
+    }
+
+    function updatePeriodDisplay(chartPayload) {
+        const el = document.getElementById('agri-period-display');
+        if (!el || !chartPayload || !Array.isArray(chartPayload.points)) return;
+        const actuals = chartPayload.points
+            .filter(p => p.kind === 'actual' && p.date)
+            .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        if (!actuals.length) return;
+        const firstActual = parseIsoDate(actuals[0].date);
+        const lastActual = parseIsoDate(actuals[actuals.length - 1].date);
+        if (!firstActual || !lastActual) return;
+
+        const start = new Date(lastActual);
+        start.setDate(start.getDate() - Math.max(1, chartRangeDays) + 1);
+        const clampedStart = start < firstActual ? firstActual : start;
+        el.value = `${formatDotDate(clampedStart)} ~ ${formatDotDate(lastActual)}`;
+    }
+
+    function applyChartRange(chartPayload) {
+        if (!chartPayload || !chartPayload.points) return chartPayload;
+        const sorted = [...chartPayload.points].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        const lastActual = [...sorted].reverse().find(p => p.kind === 'actual');
+        if (!lastActual) return chartPayload;
+        const cutoff = new Date(lastActual.date);
+        cutoff.setDate(cutoff.getDate() - chartRangeDays);
+        const filtered = sorted.filter(p => p.kind !== 'actual' || new Date(p.date) >= cutoff);
+        return { ...chartPayload, points: filtered };
+    }
+
+    function renderChart(chartPayload) {
+        lastPayload = chartPayload;
+        updateHeroMeta(chartPayload);
+        updatePeriodDisplay(chartPayload);
+        const filtered = applyChartRange(chartPayload);
+        const pts = filtered.points || [];
+        updateFreshness(chartPayload);
+        updateMetrics(pts, chartPayload.metrics);
+        updateRiskFactors(chartPayload);
+        const { labels, actual, chronos, timesfm, predictLow, predictHigh } = buildChartData(pts);
+        const ctx = document.getElementById('agri-chart');
+        const c = themeColors();
+        if (agriChart) agriChart.destroy();
+        agriChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: '실제 가격',
+                        data: actual,
+                        borderColor: '#2e7d2e',
+                        backgroundColor: 'rgba(46,125,46,0.10)',
+                        spanGaps: false,
+                        tension: 0.32,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        borderWidth: 2.4,
+                        fill: false,
+                    },
+                    {
+                        label: '예측 범위',
+                        data: predictLow,
+                        borderColor: 'rgba(201, 138, 24, 0)',
+                        backgroundColor: 'rgba(201, 138, 24, 0)',
+                        spanGaps: false,
+                        tension: 0.2,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        borderWidth: 0,
+                        fill: false,
+                        skipLegend: true,
+                        skipTooltip: true,
+                    },
+                    {
+                        label: '예측 범위',
+                        data: predictHigh,
+                        borderColor: 'rgba(201, 138, 24, 0)',
+                        backgroundColor: 'rgba(201, 138, 24, 0.12)',
+                        spanGaps: false,
+                        tension: 0.2,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        borderWidth: 0,
+                        fill: '-1',
+                        skipLegend: true,
+                        skipTooltip: true,
+                    },
+                    {
+                        label: '점예측(3일)',
+                        data: timesfm,
+                        borderColor: '#00c2ff',
+                        backgroundColor: 'rgba(0,194,255,0.14)',
+                        borderDash: [],
+                        spanGaps: false,
+                        tension: 0.28,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        borderWidth: 3,
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            color: c.text,
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            padding: 16,
+                            filter: function (legendItem, data) {
+                                const ds = data.datasets[legendItem.datasetIndex];
+                                return !(ds && ds.skipLegend);
+                            },
+                        },
+                    },
+                    title: {
+                        display: false,
+                        text: (chartPayload.item_label || chartPayload.crop_ko || '') + ' · 가격(원)',
+                        color: c.text,
+                        font: { size: 14, weight: '600' },
+                        padding: { top: 4, bottom: 14 },
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.92)',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#e2e8f0',
+                        borderColor: 'rgba(255,255,255,0.08)',
+                        borderWidth: 1,
+                        padding: 10,
+                        cornerRadius: 10,
+                        callbacks: {
+                            title: function (items) {
+                                if (!items.length) return '';
+                                return String(items[0].label || '');
+                            },
+                            label: function (ctx) {
+                                const y = ctx.parsed.y;
+                                if (y === null || y === undefined || Number.isNaN(y)) {
+                                    return null;
+                                }
+                                return ctx.dataset.label + ': ' + new Intl.NumberFormat('ko-KR').format(y) + '원';
+                            },
+                        },
+                        filter: function (item) {
+                            const y = item.parsed.y;
+                            const ds = item.dataset || {};
+                            return y !== null && y !== undefined && !Number.isNaN(y) && !ds.skipTooltip;
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        ticks: { color: c.muted, maxRotation: 0, autoSkipPadding: 16 },
+                        grid: { color: c.grid, drawTicks: false },
+                        border: { display: false },
+                    },
+                    y: {
+                        title: { display: true, text: '가격 (KRW)', color: c.muted, font: { size: 11 } },
+                        ticks: { color: c.muted },
+                        grid: { color: c.grid, drawTicks: false },
+                        border: { display: false },
+                    },
+                },
+            },
+        });
+    }
+
+    async function fetchChartPayload(itemId, model, includePrediction) {
+        const url = '/api/agri/chart/?item_id='
+            + encodeURIComponent(itemId)
+            + '&model='
+            + encodeURIComponent(model)
+            + (includePrediction ? '&include_prediction=1' : '');
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || '실패');
+        return data;
+    }
+
+    function mergeForecastPayloads(probData, pointData) {
+        const probPoints = (probData && probData.points) || [];
+        const pointPoints = (pointData && pointData.points) || [];
+        const actuals = probPoints.filter(p => p.kind === 'actual');
+        const chronosPredicts = probPoints
+            .filter(p => p.kind === 'predict')
+            .map(p => ({ ...p, forecast_model: 'chronos2' }));
+        const timesfmPredicts = pointPoints
+            .filter(p => p.kind === 'predict')
+            .map(p => ({ ...p, forecast_model: 'timesfm' }));
+        const mergedPoints = [...actuals, ...chronosPredicts, ...timesfmPredicts]
+            .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+
+        return {
+            ...probData,
+            model_name: 'combined',
+            points: mergedPoints,
+            forecast_table: probData && probData.forecast_table,
+            point_forecast_table: pointData && pointData.forecast_table,
+        };
+    }
+
+    async function loadActualOnly(showAlert) {
+        const item_id = document.getElementById('agri-item-select').value;
+        try {
+            const data = await fetchChartPayload(item_id, 'probabilistic', false);
+            data.points = (data.points || []).filter(function(p) { return p.kind === 'actual'; });
+            renderChart(data);
+            renderForecastTable(null);
+            if (showAlert === true) {
+                alert('실제가만 표시했습니다.');
+            }
+        } catch (err) {
+            alert(err.message || '실패');
+        }
+    }
+
+    document.getElementById('agri-load-chart')?.addEventListener('click', async () => {
+        await loadActualOnly(false);
+    });
+
+    async function loadCachedPrediction(btn) {
+        const item_id = document.getElementById('agri-item-select').value;
+        if (!item_id) return;
+        const meta = selectedAgriItemMeta();
+        if (meta && meta.forecast_supported === false) {
+            await loadActualOnly(false);
+            if (btn) {
+                alert('이 품목/단위/등급 조합은 현재 AWS 예측 모델에 연결되어 있지 않아 실제가만 표시됩니다.');
+            }
+            return;
+        }
+        setButtonLoading(btn, true, '불러오는 중...');
+        try {
+            const [probData, pointData] = await Promise.all([
+                fetchChartPayload(item_id, 'probabilistic', true),
+                fetchChartPayload(item_id, 'point', true),
+            ]);
+            const data = mergeForecastPayloads(probData, pointData);
+            renderChart(data);
+            renderForecastTable(probData.forecast_table);
+        } catch (err) {
+            alert(err.message || '실패');
+        } finally {
+            setButtonLoading(btn, false);
+        }
+    }
+
+    function setButtonLoading(btn, isLoading, loadingText) {
+        if (!btn) return;
+        if (isLoading) {
+            btn.dataset.originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> ' + loadingText;
+        } else {
+            btn.disabled = false;
+            if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText;
+        }
+    }
+
+    document.getElementById('agri-force-forecast')?.addEventListener('click', async (event) => {
+        await loadCachedPrediction(event.currentTarget);
+    });
+
+    document.getElementById('agri-run-forecast')?.addEventListener('click', async (event) => {
+        const btn = event.currentTarget;
+        const item_id = document.getElementById('agri-item-select').value;
+        const meta = selectedAgriItemMeta();
+        if (meta && meta.forecast_supported === false) {
+            await loadActualOnly(false);
+            alert('이 품목/단위/등급 조합은 현재 AWS 예측 모델에 연결되어 있지 않아 실제가만 표시됩니다.');
+            return;
+        }
+        const ok = window.confirm('구간 예측(10일)과 점예측(3일)을 모두 새로 실행해 저장할까요?');
+        if (!ok) return;
+        setButtonLoading(btn, true, 'AWS 추론 중...');
+        try {
+            for (const model of FORECAST_MODELS) {
+                const res = await fetch('/api/agri/run-forecast/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                    body: JSON.stringify({ item_id, model, force: true }),
+                });
+                const data = await res.json();
+                if (!data.ok) { alert(data.error || '실패'); return; }
+            }
+            await loadCachedPrediction(null);
+            alert('구간 예측(10일)과 점예측(3일) 새 예측값을 저장했습니다.');
+        } finally {
+            setButtonLoading(btn, false);
+        }
+    });
+
+    document.getElementById('agri-reconcile')?.addEventListener('click', async () => {
+        const item_id = document.getElementById('agri-item-select').value;
+        let updated = 0;
+        for (const model of FORECAST_MODELS) {
+            const res = await fetch('/api/agri/reconcile/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ item_id, model }),
+            });
+            const data = await res.json();
+            if (!data.ok) { alert(data.error || '실패'); return; }
+            updated += (data.reconcile && data.reconcile.updated) || 0;
+        }
+        await loadCachedPrediction(null);
+        alert('정산: ' + updated + '일 반영');
+    });
+
+    function splitAnalysisSentences(text) {
+        return String(text || '')
+            .replace(/\s+/g, ' ')
+            .split(/(?<=[.!?。！？]|다\.|요\.)\s+/)
+            .map(s => s.trim())
+            .filter(Boolean);
+    }
+
+    function readableSummaryLines(text) {
+        const normalized = normalizeModelTerms(text)
+            .replace(/\s+/g, ' ')
+            .replace(/,\s*(향후\s*\d+\s*일)/g, '\n$1')
+            .replace(/(며|으며|고),\s*/g, '$1.\n')
+            .replace(/(예상되며|전망되며)\s*/g, '$1\n')
+            .replace(/(수준으로)\s*/g, '$1\n')
+            .trim();
+        const roughLines = normalized
+            .split(/\n+/)
+            .map(line => line.trim())
+            .filter(Boolean);
+        const lines = [];
+        roughLines.forEach(line => {
+            if (line.length <= 58) {
+                lines.push(line);
+                return;
+            }
+            const chunks = line
+                .split(/,\s+/)
+                .map(part => part.trim())
+                .filter(Boolean);
+            if (chunks.length <= 1) {
+                lines.push(line);
+                return;
+            }
+            chunks.forEach(part => lines.push(part));
+        });
+        return lines.slice(0, 6);
+    }
+
+    function extractXaiExplanationBlocks(message) {
+        const text = normalizeModelTerms(message || '').trim();
+        if (!text) return [];
+        let blocks = text.split(/\n{2,}/).map(block => block.trim()).filter(Boolean);
+        if (blocks.length > 1) {
+            blocks = blocks.slice(1);
+        }
+        if (blocks.length === 1) {
+            const single = blocks[0];
+            const splitAt = single.search(/(?:^|\n)\s*(?=향후\s*10\s*일|10\s*일\s*(?:범위|구간)|또한\s*향후\s*10\s*일|10\s*일\s*범위\s*예측)/);
+            if (splitAt > 24) {
+                return [single.slice(0, splitAt).trim(), single.slice(splitAt).trim()].filter(Boolean);
+            }
+        }
+        return blocks;
+    }
+
+    function classifyXaiSection(section, idx, total) {
+        const t = String(section || '');
+        if (/10\s*일|구간\s*예측|분위수|0\.[19]|상한|하한|범위\s*예측|P10|P90/.test(t)) {
+            return 'range';
+        }
+        if (/3\s*일|점예측/.test(t)) {
+            return 'point';
+        }
+        if (total >= 2) {
+            return idx === 0 ? 'point' : 'range';
+        }
+        return 'point';
+    }
+
+    function xaiSectionTitle(section, idx, total) {
+        return classifyXaiSection(section, idx, total) === 'range'
+            ? '10일 범위 예측 근거'
+            : '3일 점예측 근거';
+    }
+
+    function getAnalysisChartData(payload) {
+        const points = (payload && payload.points) || [];
+        const actuals = points.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const chronos = points.filter(p => (
+            p.forecast_model === 'chronos2' || (p.kind === 'predict' && p.forecast_model !== 'timesfm')
+        ));
+        const timesfm = points.filter(p => p.forecast_model === 'timesfm');
+        const metrics = (payload && payload.metrics) || {};
+        const chronosValues = chronos.map(p => Number(p.value)).filter(Number.isFinite);
+        const rangeLows = chronos.map(p => Number(p.p10 ?? p.p1)).filter(Number.isFinite);
+        const rangeHighs = chronos.map(p => Number(p.p90 ?? p.p99)).filter(Number.isFinite);
+        const avg = Number.isFinite(Number(metrics.prediction_average_krw))
+            ? Number(metrics.prediction_average_krw)
+            : (chronosValues.length ? chronosValues.reduce((a, b) => a + b, 0) / chronosValues.length : null);
+        return {
+            actuals,
+            chronos,
+            timesfm,
+            metrics,
+            latestActual: actuals[actuals.length - 1] || null,
+            firstChronos: chronos[0] || null,
+            lastChronos: chronos[chronos.length - 1] || null,
+            firstTimes: timesfm[0] || null,
+            lastTimes: timesfm[timesfm.length - 1] || null,
+            rangeLow: rangeLows.length ? Math.min(...rangeLows) : null,
+            rangeHigh: rangeHighs.length ? Math.max(...rangeHighs) : null,
+            avg,
+            volatility: Number(metrics.volatility_pct),
+        };
+    }
+
+    function xaiDirectionLabel(first, last) {
+        const a = Number(first);
+        const b = Number(last);
+        if (!Number.isFinite(a) || !Number.isFinite(b)) return { text: '방향 분석', tone: 'neutral' };
+        const diff = b - a;
+        if (diff > 0) return { text: '상승 흐름', tone: 'up' };
+        if (diff < 0) return { text: '하락 흐름', tone: 'down' };
+        return { text: '횡보', tone: 'neutral' };
+    }
+
+    function xaiBulletPoints(text, maxItems) {
+        return splitAnalysisSentences(normalizeModelTerms(text))
+            .map(s => s.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim())
+            .filter(s => s.length >= 16 && !isTechnicalModelDescription(s))
+            .slice(0, maxItems || 3);
+    }
+
+    function renderXaiNotesHtml(items) {
+        if (!items || !items.length) return '';
+        return (
+            '<div class="analysis-xai-notes">'
+            + items.map(item => '<p>' + esc(item) + '</p>').join('')
+            + '</div>'
+        );
+    }
+
+    function isNumericRecitation(sentence) {
+        const s = String(sentence || '');
+        if (/(때문|보입니다|추정|영향|반영|근거|요인|판단|전망|우려|가능|연결|해석|반영된|기여)/.test(s)) {
+            return false;
+        }
+        const numericHits = (s.match(/₩|[0-9,]+%|\d{1,2}월|\d{4}-\d{2}-\d{2}/g) || []).length;
+        return numericHits >= 3;
+    }
+
+    function xaiReasoningBlocks(text) {
+        const sentences = splitAnalysisSentences(normalizeModelTerms(text))
+            .map(s => s.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim())
+            .filter(s => s.length >= 14 && !isTechnicalModelDescription(s) && !isNumericRecitation(s));
+        const direction = sentences.filter(s => /상승|하락|횡보|방향|전망|우상향|하방|상방|완만|급등|급락/.test(s));
+        const causes = sentences.filter(s => /때문|보입니다|추정|영향|반영|판단|가능|연결|경로|패턴|수준/.test(s));
+        const factors = sentences.filter(s => /기상|거래량|공급|수요|월보|특보|강수|기온|유가|물가|출하|재고|공휴|휴장|CPI|금리|물류/.test(s));
+        const used = new Set([].concat(direction, causes, factors));
+        const rest = sentences.filter(s => !used.has(s));
+        return {
+            direction: direction.slice(0, 2),
+            causes: (causes.length ? causes : rest).slice(0, 3),
+            factors: factors.slice(0, 3),
+        };
+    }
+
+    function xaiDirectionLabelPlain(first, last) {
+        const base = xaiDirectionLabel(first, last);
+        if (base.tone === 'up') return { text: '오를 것 같아요', tone: 'up' };
+        if (base.tone === 'down') return { text: '내릴 것 같아요', tone: 'down' };
+        if (base.tone === 'neutral') return { text: '비슷할 것 같아요', tone: 'neutral' };
+        return { text: '방향 참고', tone: 'neutral' };
+    }
+
+    function xaiUiCopy(kind, mode) {
+        if (mode === 'plain') {
+            return {
+                directionTitle: '가격 방향',
+                directionLeadPoint: '요즘 장부 가격 흐름을 보고 앞 3일 방향을 짚었습니다.',
+                directionLeadRange: '앞 10일 동안 가격이 어느 쪽으로 기울지 참고했습니다.',
+                causePoint: '앞 3일 예상이 이렇게 나온 이유',
+                causeRange: '앞 10일 범위가 이렇게 잡힌 이유',
+                factors: '영향을 준 것들',
+                sectionPoint: '앞 3일 · 쉬운 설명',
+                sectionRange: '앞 10일 · 쉬운 설명',
+                kickerPoint: '3일 예상',
+                kickerRange: '10일 예상',
+            };
+        }
+        return {
+            directionTitle: '방향 판단',
+            directionLeadPoint: '최근 실측 흐름과 단기 가격 패턴을 기준으로 점예측 방향을 해석했습니다.',
+            directionLeadRange: '구간 예측의 시작·종료 흐름과 변동 폭을 기준으로 범위 방향을 해석했습니다.',
+            causePoint: '왜 이런 점예측인가',
+            causeRange: '왜 이런 범위·수준인가',
+            factors: '반영된 요인',
+            sectionPoint: '3일 점예측 · 판단 근거',
+            sectionRange: '10일 범위 · 판단 근거',
+            kickerPoint: '점예측',
+            kickerRange: '구간 예측',
+        };
+    }
+
+    function renderXaiReasoningHtml(text, kind, data, mode) {
+        const blocks = xaiReasoningBlocks(text);
+        const copy = xaiUiCopy(kind, mode);
+        const dirFn = mode === 'plain' ? xaiDirectionLabelPlain : xaiDirectionLabel;
+        const dir = kind === 'point'
+            ? dirFn(data.firstTimes && data.firstTimes.value, data.lastTimes && data.lastTimes.value)
+            : dirFn(data.firstChronos && data.firstChronos.value, data.lastChronos && data.lastChronos.value);
+        const sections = [];
+
+        if (blocks.direction.length) {
+            sections.push(
+                '<section class="analysis-xai-reason-block tone-direction">'
+                + '<h5>' + esc(copy.directionTitle) + ' · ' + esc(dir.text) + '</h5>'
+                + renderXaiNotesHtml(blocks.direction)
+                + '</section>'
+            );
+        } else if (dir.text && dir.text !== '방향 분석' && dir.text !== '방향 참고') {
+            sections.push(
+                '<section class="analysis-xai-reason-block tone-direction">'
+                + '<h5>' + esc(copy.directionTitle) + ' · ' + esc(dir.text) + '</h5>'
+                + '<p class="analysis-xai-lead">' + esc(kind === 'point' ? copy.directionLeadPoint : copy.directionLeadRange) + '</p>'
+                + '</section>'
+            );
+        }
+
+        if (blocks.causes.length) {
+            sections.push(
+                '<section class="analysis-xai-reason-block tone-cause">'
+                + '<h5>' + esc(kind === 'point' ? copy.causePoint : copy.causeRange) + '</h5>'
+                + renderXaiNotesHtml(blocks.causes)
+                + '</section>'
+            );
+        }
+
+        if (blocks.factors.length) {
+            sections.push(
+                '<section class="analysis-xai-reason-block tone-factor">'
+                + '<h5>' + esc(copy.factors) + '</h5>'
+                + renderXaiNotesHtml(blocks.factors)
+                + '</section>'
+            );
+        }
+
+        if (!sections.length) {
+            const fallback = String(text || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
+            return '<div class="analysis-xai-reasoning"><p class="analysis-xai-fallback">' + esc(fallback) + '</p></div>';
+        }
+
+        return '<div class="analysis-xai-reasoning">' + sections.join('') + '</div>';
+    }
+
+    function shortDateLabel(value) {
+        const raw = String(value || '');
+        if (!raw) return '-';
+        return raw.length >= 10 ? raw.slice(5) : raw;
+    }
+
+    function renderXaiTimelineSvg(actuals, forecasts) {
+        const recentActuals = actuals.slice(-5);
+        const forecastRows = forecasts.slice(0, 3);
+        const rows = recentActuals.map(p => ({ ...p, kind: 'actual' })).concat(
+            forecastRows.map(p => ({ ...p, kind: 'forecast' }))
+        );
+        if (!rows.length) return '';
+        const values = rows.map(p => Number(p.value)).filter(Number.isFinite);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const span = max - min || 1;
+        const width = 520;
+        const height = 118;
+        const padX = 28;
+        const padY = 18;
+        const plotW = width - padX * 2;
+        const plotH = height - padY * 2;
+        const points = rows.map((row, idx) => {
+            const x = padX + (idx / Math.max(rows.length - 1, 1)) * plotW;
+            const y = padY + (1 - ((Number(row.value) - min) / span)) * plotH;
+            return { x, y, row };
+        });
+        const path = points.map((pt, idx) => `${idx === 0 ? 'M' : 'L'}${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' ');
+        const dots = points.map(pt => {
+            const color = pt.row.kind === 'forecast' ? '#2563eb' : '#15803d';
+            const label = shortDateLabel(pt.row.date);
+            return (
+                '<g>'
+                + `<circle cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="5" fill="${color}" stroke="#fff" stroke-width="2"/>`
+                + `<text x="${pt.x.toFixed(1)}" y="${height - 4}" text-anchor="middle" fill="#64748b" font-size="10">${esc(label)}</text>`
+                + `<text x="${pt.x.toFixed(1)}" y="${Math.max(pt.y - 10, 12).toFixed(1)}" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="700">${esc(fmtWon(pt.row.value).replace(' 원', ''))}</text>`
+                + '</g>'
+            );
+        }).join('');
+        return (
+            '<svg class="analysis-xai-svg" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="최근 실측과 3일 점예측 흐름">'
+            + '<rect x="0" y="0" width="' + width + '" height="' + height + '" rx="14" fill="#f8faf3"/>'
+            + '<path d="' + path + '" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'
+            + dots
+            + '<text x="' + padX + '" y="14" fill="#64748b" font-size="10">● 실측</text>'
+            + '<text x="' + (padX + 52) + '" y="14" fill="#64748b" font-size="10">● 점예측</text>'
+            + '</svg>'
+        );
+    }
+
+    function renderXaiRangeDiagram(low, mid, high) {
+        const l = Number(low);
+        const m = Number(mid);
+        const h = Number(high);
+        if (![l, m, h].every(Number.isFinite)) return '';
+        const span = h - l || 1;
+        const midPct = Math.max(8, Math.min(92, ((m - l) / span) * 100));
+        return (
+            '<div class="analysis-xai-range-diagram" role="img" aria-label="10일 예측 범위 다이어그램">'
+            + '<div class="analysis-xai-range-track">'
+            + '<span class="analysis-xai-range-fill"></span>'
+            + `<span class="analysis-xai-range-marker" style="left:${midPct.toFixed(1)}%"></span>`
+            + '</div>'
+            + '<div class="analysis-xai-range-labels">'
+            + '<span><em>하한</em><strong>' + esc(fmtWon(l)) + '</strong></span>'
+            + '<span><em>중심</em><strong>' + esc(fmtWon(m)) + '</strong></span>'
+            + '<span><em>상한</em><strong>' + esc(fmtWon(h)) + '</strong></span>'
+            + '</div>'
+            + '</div>'
+        );
+    }
+
+    function renderXaiTableRows(rows) {
+        return rows.map(row => (
+            '<tr><th>' + esc(row[0]) + '</th><td>' + esc(row[1]) + '</td></tr>'
+        )).join('');
+    }
+
+    function renderXaiSection3Day(text, data, mode) {
+        const dirFn = mode === 'plain' ? xaiDirectionLabelPlain : xaiDirectionLabel;
+        const copy = xaiUiCopy('point', mode);
+        const dir = dirFn(data.firstTimes && data.firstTimes.value, data.lastTimes && data.lastTimes.value);
+        return (
+            '<article class="analysis-xai-section tone-point">'
+            + '<header class="analysis-xai-section-head">'
+            + '<div><span class="analysis-xai-kicker">' + esc(copy.kickerPoint) + '</span><h4>' + esc(copy.sectionPoint) + '</h4></div>'
+            + '<span class="analysis-xai-chip tone-' + esc(dir.tone) + '">' + esc(dir.text) + '</span>'
+            + '</header>'
+            + renderXaiReasoningHtml(text, 'point', data, mode)
+            + '</article>'
+        );
+    }
+
+    function renderXaiSection10Day(text, data, mode) {
+        const dirFn = mode === 'plain' ? xaiDirectionLabelPlain : xaiDirectionLabel;
+        const copy = xaiUiCopy('range', mode);
+        const dir = dirFn(data.firstChronos && data.firstChronos.value, data.lastChronos && data.lastChronos.value);
+        return (
+            '<article class="analysis-xai-section tone-range">'
+            + '<header class="analysis-xai-section-head">'
+            + '<div><span class="analysis-xai-kicker">' + esc(copy.kickerRange) + '</span><h4>' + esc(copy.sectionRange) + '</h4></div>'
+            + '<span class="analysis-xai-chip tone-' + esc(dir.tone) + '">' + esc(dir.text) + '</span>'
+            + '</header>'
+            + renderXaiReasoningHtml(text, 'range', data, mode)
+            + '</article>'
+        );
+    }
+
+    function renderXaiVisualHtml(message, payload, mode) {
+        const viewMode = mode || 'expert';
+        const sections = extractXaiExplanationBlocks(message);
+        const data = getAnalysisChartData(payload || lastPayload || {});
+        if (!sections.length) {
+            const text = String(normalizeModelTerms(message) || '').replace(/\s+/g, ' ').trim();
+            if (!text) {
+                return '<p class="analysis-xai-fallback">XAI 설명 결과가 비어 있습니다.</p>';
+            }
+            return (
+                '<article class="analysis-xai-section">'
+                + renderXaiNotesHtml(xaiBulletPoints(text, 4))
+                + '</article>'
+            );
+        }
+        return sections.map((section, idx) => {
+            const kind = classifyXaiSection(section, idx, sections.length);
+            if (kind === 'range') {
+                return renderXaiSection10Day(section, data, viewMode);
+            }
+            if (kind === 'point') {
+                return renderXaiSection3Day(section, data, viewMode);
+            }
+            const bullets = xaiBulletPoints(section, 3);
+            return (
+                '<article class="analysis-xai-section">'
+                + '<header class="analysis-xai-section-head"><div><h4>' + esc(xaiSectionTitle(section, idx, sections.length)) + '</h4></div></header>'
+                + renderXaiNotesHtml(bullets)
+                + '</article>'
+            );
+        }).join('');
+    }
+
+    function bindXaiModeTabs(container, payload) {
+        if (!container) return;
+        container.querySelectorAll('.analysis-xai-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-xai-mode') || 'expert';
+                container.querySelectorAll('.analysis-xai-tab').forEach(tab => {
+                    tab.classList.toggle('is-active', tab === btn);
+                });
+                const prose = container.querySelector('#analysis-xai-prose');
+                if (!prose) return;
+                const message = mode === 'plain' ? (lastExplanationPlain || lastExplanation) : lastExplanation;
+                prose.innerHTML = renderXaiVisualHtml(message, payload || lastPayload, mode);
+            });
+        });
+    }
+
+    function normalizeModelTerms(text) {
+        return String(text || '')
+            .replace(/TimesFM(?:\s*2\.5)?/gi, '점예측')
+            .replace(/Chronos[\s-]*2(?:\s*LoRA)?/gi, '구간 예측')
+            .replace(/Chronos2(?:\s*LoRA)?/gi, '구간 예측');
+    }
+
+    function isTechnicalModelDescription(text) {
+        return /(파라미터|아키텍처|LoRA|Zero[-\s]?Shot|AutoGluon|Amazon|pipeline|pretrained|from_pretrained|device_map)/i.test(String(text || ''));
+    }
+
+    function firstMatchingSentence(text, keywords) {
+        const lines = splitAnalysisSentences(text)
+            .map(normalizeModelTerms)
+            .map(s => s.replace(/\s+/g, ' ').trim())
+            .filter(Boolean)
+            .filter(s => !isTechnicalModelDescription(s));
+        return lines.find(line => keywords.some(keyword => line.includes(keyword))) || '';
+    }
+
+    function xaiInsightLines(text, payload) {
+        const promptSentences = splitAnalysisSentences(normalizeModelTerms(text))
+            .map(s => s.replace(/\s+/g, ' ').trim())
+            .filter(Boolean)
+            .filter(s => !isTechnicalModelDescription(s));
+        const pickFromPrompt = (keywords, used) => {
+            const found = promptSentences.find(line => (
+                !used.has(line) && keywords.some(keyword => line.includes(keyword))
+            ));
+            if (found) {
+                used.add(found);
+            }
+            return found || '';
+        };
+        const used = new Set();
+        const directionLine = pickFromPrompt(['상승', '하락', '횡보', '예측', '전망', '가격'], used);
+        const volatilityLine = pickFromPrompt(['변동성', '리스크', '범위', '상한', '하한', '불확실'], used);
+        const factorLine = pickFromPrompt(['기상', '경제', '강수', '기온', '수요', '공급', '물류', '유가', '거래량', '월보', '특보'], used);
+        const fallbackLines = promptSentences.filter(line => !used.has(line));
+        return [directionLine, volatilityLine, factorLine, ...fallbackLines]
+            .map(normalizeModelTerms)
+            .map(s => s.replace(/\s+/g, ' ').trim())
+            .filter(Boolean)
+            .filter(s => !isTechnicalModelDescription(s))
+            .slice(0, 3);
+    }
+
+    function analysisMetricRows(payload) {
+        const points = (payload && payload.points) || [];
+        const actuals = points.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const chronos = points.filter(p => p.forecast_model === 'chronos2' || (p.kind === 'predict' && p.forecast_model !== 'timesfm'));
+        const timesfm = points.filter(p => p.forecast_model === 'timesfm');
+        const latestActual = actuals[actuals.length - 1];
+        const firstChronos = chronos[0];
+        const firstTimes = timesfm[0];
+        const rows = [
+            ['최근 실측가', latestActual ? fmtWon(latestActual.value) : '-'],
+            ['구간 예측(10일) 첫 예측', firstChronos ? fmtWon(firstChronos.value) : '-'],
+            ['점예측(3일) 첫 예측', firstTimes ? fmtWon(firstTimes.value) : '-'],
+        ];
+        if (firstChronos) {
+            const low = firstChronos.p10 ?? firstChronos.p1;
+            const high = firstChronos.p90 ?? firstChronos.p99;
+            rows.push(['예측 범위', fmtWon(low) + ' ~ ' + fmtWon(high)]);
+        }
+        return rows;
+    }
+
+    function analysisSummaryCards(payload) {
+        const points = (payload && payload.points) || [];
+        const metrics = (payload && payload.metrics) || {};
+        const actuals = points.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const chronos = points.filter(p => p.forecast_model === 'chronos2' || (p.kind === 'predict' && p.forecast_model !== 'timesfm'));
+        const latestActual = actuals[actuals.length - 1];
+        const chronosValues = chronos.map(p => Number(p.value)).filter(Number.isFinite);
+        const firstChronos = chronos[0];
+        const lastChronos = chronos[chronos.length - 1];
+        const rangeLows = chronos.map(p => Number(p.p10 ?? p.p1)).filter(Number.isFinite);
+        const rangeHighs = chronos.map(p => Number(p.p90 ?? p.p99)).filter(Number.isFinite);
+        const avg = Number.isFinite(Number(metrics.prediction_average_krw))
+            ? Number(metrics.prediction_average_krw)
+            : (chronosValues.length ? chronosValues.reduce((a, b) => a + b, 0) / chronosValues.length : null);
+        const low = rangeLows.length ? Math.min(...rangeLows) : null;
+        const high = rangeHighs.length ? Math.max(...rangeHighs) : null;
+        let direction = '판단 보류';
+        let directionTone = 'neutral';
+        if (firstChronos && lastChronos && Number.isFinite(Number(firstChronos.value)) && Number.isFinite(Number(lastChronos.value))) {
+            const diff = Number(lastChronos.value) - Number(firstChronos.value);
+            if (diff > 0) {
+                direction = '상승 예상';
+                directionTone = 'up';
+            } else if (diff < 0) {
+                direction = '하락 예상';
+                directionTone = 'down';
+            } else {
+                direction = '횡보 예상';
+            }
+        }
+        const volatility = Number(metrics.volatility_pct);
+        const risk = Number.isFinite(volatility)
+            ? (volatility >= 12 ? '높음' : volatility >= 6 ? '보통' : '낮음')
+            : '자료 부족';
+        return [
+            { label: '현재 실측가', value: latestActual ? fmtWon(latestActual.value) : '-', sub: latestActual ? String(latestActual.date) : '최근 실측 없음', tone: 'actual' },
+            { label: '10일 예측 평균', value: fmtWon(avg), sub: chronos.length ? `${chronos.length}일 예측 기준` : '예측 없음', tone: 'forecast' },
+            { label: '예측 범위', value: fmtWon(low) + ' ~ ' + fmtWon(high), sub: '극단값 제외 중심 구간', tone: 'range' },
+            { label: '가격 방향', value: direction, sub: firstChronos && lastChronos ? `${fmtWon(firstChronos.value)} → ${fmtWon(lastChronos.value)}` : '예측값 부족', tone: directionTone },
+            { label: '변동성 / 리스크', value: Number.isFinite(volatility) ? `${volatility.toFixed(2)}% · ${risk}` : risk, sub: '최근 실측 10개 기준', tone: 'risk' },
+        ];
+    }
+
+    function renderAnalysisVisual(message, payload, image) {
+        const target = document.getElementById('agri-inline-analysis-text');
+        if (!target) return;
+        const sentences = splitAnalysisSentences(normalizeModelTerms(message));
+        const summary = sentences[0] || '분석 결과를 생성했습니다.';
+        const summaryLines = readableSummaryLines(summary);
+        const metricRows = analysisMetricRows(payload || lastPayload);
+        const summaryCards = analysisSummaryCards(payload || lastPayload);
+        const metricHtml = metricRows.map(row => (
+            '<tr><th>' + esc(row[0]) + '</th><td>' + esc(row[1]) + '</td></tr>'
+        )).join('');
+        const summaryCardHtml = summaryCards.map(card => (
+            '<article class="analysis-summary-card tone-' + esc(card.tone) + '">'
+            + '<span>' + esc(card.label) + '</span>'
+            + '<strong>' + esc(card.value) + '</strong>'
+            + '<em>' + esc(card.sub) + '</em>'
+            + '</article>'
+        )).join('');
+        const summaryHtml = summaryLines
+            .map(line => '<p>' + esc(line) + '</p>')
+            .join('');
+        const xaiBody = renderXaiVisualHtml(message, payload || lastPayload, 'expert');
+
+        target.innerHTML = `
+            <article class="analysis-brief">
+                <span>전체 요약</span>
+                <div class="analysis-brief-lines">${summaryHtml || '<p>' + esc(summary) + '</p>'}</div>
+            </article>
+            <div class="analysis-visual-grid">
+                <section class="analysis-diagram-panel" aria-label="예측 분석 다이어그램">
+                    <div class="diagram-title">한눈에 보는 예측 요약</div>
+                    <div class="analysis-summary-map">${summaryCardHtml}</div>
+                </section>
+                <section class="analysis-table-panel">
+                    <div class="diagram-title">Key Numbers</div>
+                    <table>${metricHtml}</table>
+                </section>
+            </div>
+            <section class="analysis-insight-panel" id="analysis-xai-panel">
+                <div class="analysis-xai-head">
+                    <div class="diagram-title">XAI · 판단 근거</div>
+                    <div class="analysis-xai-tabs" role="tablist" aria-label="XAI 설명 보기 방식">
+                        <button type="button" class="analysis-xai-tab is-active" data-xai-mode="expert" role="tab" aria-selected="true">전문가용</button>
+                        <button type="button" class="analysis-xai-tab" data-xai-mode="plain" role="tab" aria-selected="false">쉬운 설명</button>
+                    </div>
+                </div>
+                <div class="analysis-xai-prose" id="analysis-xai-prose">${xaiBody}</div>
+            </section>
+        `;
+        bindXaiModeTabs(document.getElementById('analysis-xai-panel'), payload || lastPayload);
+    }
+
+    function renderAnalysisRailImage(image, statusText) {
+        const rail = document.getElementById('agri-analysis-image-rail');
+        if (!rail) return;
+        const imageUrl = image && (image.data_url || image.url);
+        if (imageUrl) {
+            rail.className = 'analysis-image-rail-ready';
+            rail.innerHTML = '<button type="button" class="analysis-image-zoom-trigger" aria-label="결과분석 이미지 크게 보기"><img src="' + esc(imageUrl) + '" alt="AI가 생성한 가격 예측 인포그래픽"><span>클릭해서 크게 보기</span></button>';
+            rail.querySelector('.analysis-image-zoom-trigger')?.addEventListener('click', () => openAnalysisImageLightbox(imageUrl));
+            return;
+        }
+        rail.className = 'analysis-image-rail-empty';
+        rail.innerHTML = statusText || '이미지를 생성하지 못했습니다. 결과 분석을 다시 실행해 주세요.';
+    }
+
+    function openAnalysisImageLightbox(imageUrl) {
+        const box = document.getElementById('analysis-image-lightbox');
+        const img = document.getElementById('analysis-image-lightbox-img');
+        if (!box || !img || !imageUrl) return;
+        img.src = imageUrl;
+        box.classList.add('is-open');
+        box.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('analysis-image-lightbox-open');
+    }
+
+    function closeAnalysisImageLightbox() {
+        const box = document.getElementById('analysis-image-lightbox');
+        const img = document.getElementById('analysis-image-lightbox-img');
+        if (!box) return;
+        box.classList.remove('is-open');
+        box.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('analysis-image-lightbox-open');
+        if (img) img.removeAttribute('src');
+    }
+
+    document.getElementById('analysis-image-lightbox-close')?.addEventListener('click', closeAnalysisImageLightbox);
+    document.querySelector('#analysis-image-lightbox .analysis-image-lightbox__backdrop')?.addEventListener('click', closeAnalysisImageLightbox);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeAnalysisImageLightbox();
+    });
+
+    document.getElementById('agri-explain')?.addEventListener('click', async () => {
+        const item_id = document.getElementById('agri-item-select').value;
+        const inlineExplainEl = document.getElementById('agri-inline-analysis-text');
+        if (inlineExplainEl) {
+            inlineExplainEl.innerHTML = '<div class="analysis-loading"><i class="fas fa-circle-notch fa-spin"></i><strong>결과 분석 생성 중...</strong><span>요약, 다이어그램, 표를 구성하고 있습니다.</span></div>';
+            inlineExplainEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        renderAnalysisRailImage(null, '<i class="fas fa-circle-notch fa-spin"></i><strong>이미지 생성 중...</strong>');
+        try {
+            const explainPromise = fetch('/api/agri/explain/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ item_id, model: 'probabilistic' }),
+            });
+            const res = await explainPromise;
+            const data = await res.json();
+            const message = data.ok ? (data.explanation || '') : (data.error || '실패');
+            const plainMessage = data.ok ? (data.explanation_plain || message) : message;
+            lastExplanation = message;
+            lastExplanationPlain = plainMessage;
+            renderAnalysisVisual(message, lastPayload);
+
+            fetch('/api/agri/analysis-image/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ item_id, model: 'probabilistic', analysis_text: message }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok && data.image) {
+                        renderAnalysisRailImage(data.image);
+                    } else {
+                        renderAnalysisRailImage(null, data.error || '이미지 생성 결과가 없어 텍스트 분석만 표시했습니다.');
+                    }
+                })
+                .catch(() => {
+                    renderAnalysisRailImage(null, '이미지 생성이 지연되거나 실패했습니다. 텍스트 분석은 정상 표시됩니다.');
+                });
+        } catch (err) {
+            renderAnalysisVisual(err.message || '결과 분석을 생성하지 못했습니다.', lastPayload);
+            renderAnalysisRailImage(null, '이미지 생성이 중단되었습니다.');
+        }
+    });
+
+    document.getElementById('agri-explain-shortcut')?.addEventListener('click', () => {
+        document.getElementById('agri-explain')?.click();
+    });
+
+    window.addEventListener('themechange', () => {
+        if (lastPayload) renderChart(lastPayload);
+    });
+
+    document.querySelectorAll('.chart-range-toggle button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const days = parseInt(btn.getAttribute('data-range'), 10);
+            if (!Number.isFinite(days)) return;
+            chartRangeDays = days;
+            document.querySelectorAll('.chart-range-toggle button').forEach(b => b.classList.toggle('active', b === btn));
+            if (lastPayload) renderChart(lastPayload);
+        });
+    });
+
+    document.getElementById('agri-item-select')?.addEventListener('change', () => {
+        loadCachedPrediction(null);
+    });
+
+    document.getElementById('agri-table-toggle')?.addEventListener('click', () => {
+        const panel = document.getElementById('agri-table-panel');
+        const btn = document.getElementById('agri-table-toggle');
+        if (!panel || !btn) return;
+        const nextOpen = panel.classList.contains('hidden');
+        panel.classList.toggle('hidden', !nextOpen);
+        btn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+        btn.classList.toggle('open', nextOpen);
+    });
+
+    loadItems().then(() => loadCachedPrediction(null));
+})();
+</script>
+{% endif %}
+{% if page == 'report' %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    function getCookie(name) {
+        const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? decodeURIComponent(v[2]) : '';
+    }
+
+    const csrftoken = getCookie('csrftoken');
+    let reportChart = null;
+    let lastReportItemLabel = 'agri-report';
+    let reportItemRows = [];
+
+    function fmtWon(value) {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return '-';
+        return new Intl.NumberFormat('ko-KR').format(Math.round(n)) + ' 원';
+    }
+
+    function formatNow() {
+        const d = new Date();
+        return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.'
+            + String(d.getDate()).padStart(2, '0') + ' '
+            + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    function escReport(value) {
+        return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    }
+
+    function uniqueReportValues(rows, key) {
+        return [...new Set((rows || []).map(row => row[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'ko'));
+    }
+
+    function fillReportOptions(select, values) {
+        if (!select) return;
+        select.innerHTML = values.map(value => '<option value="' + escReport(value) + '">' + escReport(value) + '</option>').join('');
+    }
+
+    function syncReportItemSelect() {
+        const hidden = document.getElementById('report-item-select');
+        const cropSel = document.getElementById('report-crop-select');
+        const unitSel = document.getElementById('report-unit-select');
+        const gradeSel = document.getElementById('report-grade-select');
+        if (!hidden || !cropSel || !unitSel || !gradeSel) return null;
+        const currentUnit = unitSel.value;
+        const currentGrade = gradeSel.value;
+        const cropRows = reportItemRows.filter(row => row.crop === cropSel.value);
+        fillReportOptions(unitSel, uniqueReportValues(cropRows, 'unit'));
+        unitSel.value = cropRows.some(row => row.unit === currentUnit) ? currentUnit : (unitSel.options[0]?.value || '');
+        const unitRows = cropRows.filter(row => row.unit === unitSel.value);
+        fillReportOptions(gradeSel, uniqueReportValues(unitRows, 'grade'));
+        gradeSel.value = unitRows.some(row => row.grade === currentGrade) ? currentGrade : (gradeSel.options[0]?.value || '');
+        const matched = unitRows.find(row => row.grade === gradeSel.value) || unitRows[0] || cropRows[0] || reportItemRows[0];
+        if (matched) hidden.value = matched.id;
+        return matched || null;
+    }
+
+    async function loadReportItems() {
+        const hidden = document.getElementById('report-item-select');
+        const cropSel = document.getElementById('report-crop-select');
+        const unitSel = document.getElementById('report-unit-select');
+        const gradeSel = document.getElementById('report-grade-select');
+        const res = await fetch('/api/agri/items/');
+        const data = await res.json();
+        if (!data.ok) {
+            if (hidden) hidden.value = '';
+            return;
+        }
+        reportItemRows = data.items || [];
+        const preferred = reportItemRows.find(row => row.crop === '배추') || reportItemRows[0];
+        fillReportOptions(cropSel, uniqueReportValues(reportItemRows, 'crop'));
+        cropSel.value = preferred?.crop || cropSel.options[0]?.value || '';
+        fillReportOptions(unitSel, uniqueReportValues(reportItemRows.filter(row => row.crop === cropSel.value), 'unit'));
+        unitSel.value = preferred?.unit || unitSel.options[0]?.value || '';
+        fillReportOptions(gradeSel, uniqueReportValues(reportItemRows.filter(row => row.crop === cropSel.value && row.unit === unitSel.value), 'grade'));
+        gradeSel.value = preferred?.grade || gradeSel.options[0]?.value || '';
+        syncReportItemSelect();
+        cropSel.onchange = () => { syncReportItemSelect(); buildReport(); };
+        unitSel.onchange = () => { syncReportItemSelect(); buildReport(); };
+        gradeSel.onchange = () => { syncReportItemSelect(); buildReport(); };
+    }
+
+    async function fetchChartPayload(itemId, model, includePrediction = true) {
+        const res = await fetch('/api/agri/chart/?item_id=' + encodeURIComponent(itemId)
+            + '&model=' + encodeURIComponent(model)
+            + (includePrediction ? '&include_prediction=1' : ''));
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || '예측 데이터를 불러오지 못했습니다.');
+        return data;
+    }
+
+    function mergeReportPayload(probData, pointData) {
+        const actuals = ((probData && probData.points) || []).filter(p => p.kind === 'actual');
+        const chronos = ((probData && probData.points) || [])
+            .filter(p => p.kind === 'predict')
+            .map(p => ({ ...p, forecast_model: 'chronos2' }));
+        const timesfm = ((pointData && pointData.points) || [])
+            .filter(p => p.kind === 'predict')
+            .map(p => ({ ...p, forecast_model: 'timesfm' }));
+        return {
+            ...probData,
+            points: [...actuals, ...chronos, ...timesfm].sort((a, b) => String(a.date).localeCompare(String(b.date))),
+        };
+    }
+
+    function renderReportChart(payload) {
+        const points = payload.points || [];
+        const labels = [...new Set(points.map(p => p.date))].sort();
+        const actual = labels.map(date => {
+            const p = points.find(row => row.date === date && row.kind === 'actual');
+            return p ? Number(p.value) : null;
+        });
+        const low = labels.map(date => {
+            const p = points.find(row => row.date === date && row.forecast_model === 'chronos2');
+            return p ? Number(p.p10 ?? p.p1 ?? p.value) : null;
+        });
+        const high = labels.map(date => {
+            const p = points.find(row => row.date === date && row.forecast_model === 'chronos2');
+            return p ? Number(p.p90 ?? p.p99 ?? p.value) : null;
+        });
+        const timesfm = labels.map(date => {
+            const p = points.find(row => row.date === date && row.forecast_model === 'timesfm');
+            return p ? Number(p.value) : null;
+        });
+        const ctx = document.getElementById('report-chart');
+        if (reportChart) reportChart.destroy();
+        reportChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: '실제 가격', data: actual, borderColor: '#2f7d32', borderWidth: 2.2, pointRadius: 0, tension: 0.25 },
+                    { label: '구간 예측(10일) 하단', data: low, borderColor: 'rgba(201,138,24,0)', backgroundColor: 'rgba(201,138,24,0)', pointRadius: 0, fill: false },
+                    { label: '구간 예측(10일) 범위', data: high, borderColor: 'rgba(201,138,24,0)', backgroundColor: 'rgba(201,138,24,0.18)', pointRadius: 0, fill: '-1' },
+                    { label: '점예측(3일)', data: timesfm, borderColor: '#00a9e8', borderWidth: 3, pointRadius: 3, tension: 0.2 },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { ticks: { maxRotation: 0, autoSkipPadding: 14 } },
+                    y: { title: { display: true, text: '가격 (원)' } },
+                },
+            },
+        });
+    }
+
+    function updateReportSummary(payload) {
+        const points = payload.points || [];
+        const actuals = points.filter(p => p.kind === 'actual' && Number.isFinite(Number(p.value)));
+        const timesfm = points.filter(p => p.forecast_model === 'timesfm' && Number.isFinite(Number(p.value)));
+        const chronos = points.filter(p => p.forecast_model === 'chronos2');
+        const lastActual = actuals[actuals.length - 1];
+        const firstTimes = timesfm[0];
+        const firstChronos = chronos[0];
+        document.getElementById('report-current-price').textContent = fmtWon(lastActual && lastActual.value);
+        document.getElementById('report-timesfm-price').textContent = fmtWon(firstTimes && firstTimes.value);
+        const low = firstChronos ? (firstChronos.p10 ?? firstChronos.p1 ?? firstChronos.value) : null;
+        const high = firstChronos ? (firstChronos.p90 ?? firstChronos.p99 ?? firstChronos.value) : null;
+        document.getElementById('report-chronos-range').textContent = fmtWon(low) + ' ~ ' + fmtWon(high);
+        const period = document.getElementById('report-period-display');
+        if (period && actuals.length) {
+            period.value = String(actuals[0].date).replace(/-/g, '.') + ' ~ ' + String(actuals[actuals.length - 1].date).replace(/-/g, '.');
+        }
+    }
+
+    async function buildReport() {
+        const select = document.getElementById('report-item-select');
+        const btn = document.getElementById('report-generate-btn');
+        const itemId = select.value;
+        const selectedMeta = reportItemRows.find(row => row.id === itemId);
+        const itemLabel = selectedMeta?.label || itemId;
+        if (!itemId) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 리포트 작성 중...';
+        document.getElementById('report-analysis').textContent = 'GPT 분석을 생성하고 있습니다...';
+        try {
+            if (selectedMeta && selectedMeta.forecast_supported === false) {
+                const actualData = await fetchChartPayload(itemId, 'probabilistic', false);
+                actualData.points = (actualData.points || []).filter(row => row.kind === 'actual');
+                const now = formatNow();
+                lastReportItemLabel = itemLabel.replace(/[^\w가-힣-]+/g, '_');
+                document.getElementById('report-title').textContent = itemLabel + ' 실측 가격 리포트';
+                document.getElementById('report-subtitle').textContent = '현재 AWS 예측 모델에 연결되지 않은 품목이라 실측 가격 흐름만 표시합니다.';
+                document.getElementById('report-meta-item').textContent = itemLabel;
+                document.getElementById('report-meta-time').textContent = now;
+                renderReportChart(actualData);
+                updateReportSummary(actualData);
+                document.getElementById('report-analysis').textContent = '이 품목/단위/등급 조합은 현재 AWS 구간 예측(10일)/점예측(3일) 모델에 연결되어 있지 않습니다. 예측 리포트 대신 최근 실측 가격 흐름만 표시했습니다.';
+                return;
+            }
+            const [probData, pointData] = await Promise.all([
+                fetchChartPayload(itemId, 'probabilistic'),
+                fetchChartPayload(itemId, 'point'),
+            ]);
+            const payload = mergeReportPayload(probData, pointData);
+            const now = formatNow();
+            lastReportItemLabel = itemLabel.replace(/[^\w가-힣-]+/g, '_');
+            document.getElementById('report-title').textContent = itemLabel + ' 가격 예측 분석 리포트';
+            document.getElementById('report-subtitle').textContent = '실측 가격, 구간 예측(10일) 범위, 점예측(3일)을 기반으로 작성된 자동 리포트입니다.';
+            document.getElementById('report-meta-item').textContent = itemLabel;
+            document.getElementById('report-meta-time').textContent = now;
+            renderReportChart(payload);
+            updateReportSummary(payload);
+
+            const explainRes = await fetch('/api/agri/explain/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken },
+                body: JSON.stringify({ item_id: itemId, model: 'probabilistic' }),
+            });
+            const explainData = await explainRes.json();
+            document.getElementById('report-analysis').textContent = explainData.ok
+                ? (explainData.explanation || '분석 결과가 비어 있습니다.')
+                : (explainData.error || 'GPT 분석을 생성하지 못했습니다.');
+        } catch (err) {
+            document.getElementById('report-analysis').textContent = err.message || '리포트 작성 실패';
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '리포트 작성 <i class="fas fa-wand-magic-sparkles"></i>';
+        }
+    }
+
+    async function downloadReportPdf() {
+        const filename = lastReportItemLabel + '_가격예측_리포트.pdf';
+        const sourceCanvas = document.getElementById('report-chart');
+        const downloadBtn = document.getElementById('report-download-btn');
+        const chartImage = sourceCanvas ? sourceCanvas.toDataURL('image/png') : '';
+        const payload = {
+            filename,
+            title: document.getElementById('report-title')?.textContent || '농산물 가격 예측 분석 리포트',
+            subtitle: document.getElementById('report-subtitle')?.textContent || '',
+            item: document.getElementById('report-meta-item')?.textContent || '',
+            model: '구간 예측(10일) + 점예측(3일)',
+            created_at: document.getElementById('report-meta-time')?.textContent || formatNow(),
+            analysis: document.getElementById('report-analysis')?.textContent || '',
+            chart_image: chartImage,
+            summary: {
+                current_price: document.getElementById('report-current-price')?.textContent || '-',
+                timesfm_price: document.getElementById('report-timesfm-price')?.textContent || '-',
+                chronos_range: document.getElementById('report-chronos-range')?.textContent || '-',
+            },
+        };
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = 'PDF 생성 중...';
+        }
+        try {
+            const res = await fetch('/api/report/pdf/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                let message = 'PDF 생성에 실패했습니다.';
+                try {
+                    const errorData = await res.json();
+                    message = errorData.error || message;
+                } catch (e) {}
+                throw new Error(message);
+            }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            alert(err.message || 'PDF 생성에 실패했습니다.');
+        } finally {
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = 'PDF 다운로드';
+            }
+        }
+    }
+
+    document.getElementById('report-generate-btn')?.addEventListener('click', buildReport);
+    document.getElementById('report-download-btn')?.addEventListener('click', downloadReportPdf);
+    loadReportItems().then(buildReport);
+})();
+</script>
+{% endif %}
+{% if page == 'aws' %}
+<script>
+(function() {
+    const scalingBtn = document.getElementById('scaling-btn');
+    if (scalingBtn) {
+        scalingBtn.addEventListener('click', async () => {
+            const el = document.getElementById('scaling-result');
+            const recEl = document.getElementById('scaling-recommendation');
+            const msgEl = document.getElementById('scaling-message');
+            el.classList.remove('hidden');
+            recEl.textContent = '...';
+            msgEl.textContent = 'Loading...';
+            try {
+                const res = await fetch('/api/scaling-recommendation/');
+                const data = await res.json();
+                const labels = { maintain: 'Maintain', scale_up: 'Scale Up', scale_down: 'Scale Down' };
+                recEl.textContent = labels[data.recommendation] || data.recommendation;
+                recEl.className = 'badge ' + data.recommendation;
+                msgEl.textContent = data.message + ' (Total: ' + data.total_capacity_gb + 'GB)';
+            } catch (e) {
+                recEl.textContent = '—';
+                msgEl.textContent = 'Request failed.';
+            }
+        });
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}
